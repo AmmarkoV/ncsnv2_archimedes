@@ -80,6 +80,11 @@ For example, we can train an NCSNv2 on CIFAR airplane by running the following
 python main.py --config cifar10.yml --doc airplane
 ```
 
+or 
+
+```
+PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python python main.py --config cifar10.yml --doc airplane
+```
 Log files will be saved in `<exp>/logs/airplane`.
 
 ### Sampling
@@ -89,6 +94,7 @@ If we want to sample from NCSNv2 on LSUN bedroom, we can edit `bedroom.yml` to s
 ```bash
 python main.py --sample --config cifar10.yml -i airplane
 ```
+
 
 Samples will be saved in `<exp>/image_samples/airplane`.
 
