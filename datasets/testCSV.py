@@ -198,8 +198,7 @@ def readCSVFile(filename,memPercentage=1.0,useHalfFloats=False):
 
 if __name__ == '__main__':
 
-   
-    #os.system('cp %s/neuralNetworkInputs.list %s/'% (filesPath,outputDirectoryForCombinedModels)) 
+    os.system('./getCMUBVH.sh') 
 
     data2D = readCSVFile("2d_body_all.csv")
     print("DATA 2D : ",data2D['label'])
