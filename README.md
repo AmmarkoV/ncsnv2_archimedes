@@ -74,35 +74,35 @@ Configuration files are in `config/`. You don't need to include the prefix `conf
 
 ### Training
 
-For example, we can train an NCSNv2 on LSUN bedroom by running the following
+For example, we can train an NCSNv2 on CIFAR airplane by running the following
 
 ```bash
-python main.py --config bedroom.yml --doc bedroom
+python main.py --config cifar10.yml --doc airplane
 ```
 
-Log files will be saved in `<exp>/logs/bedroom`.
+Log files will be saved in `<exp>/logs/airplane`.
 
 ### Sampling
 
 If we want to sample from NCSNv2 on LSUN bedroom, we can edit `bedroom.yml` to specify the `ckpt_id` under the group `sampling`, and then run the following
 
 ```bash
-python main.py --sample --config bedroom.yml -i bedroom
+python main.py --sample --config cifar10.yml -i airplane
 ```
 
-Samples will be saved in `<exp>/image_samples/bedroom`.
+Samples will be saved in `<exp>/image_samples/airplane`.
 
-We can interpolate between different samples (see more details in the paper). Just set `interpolation` to `true` and an appropriate `n_interpolations` under the group of `sampling` in `bedroom.yml`. We can also perform other tasks such as inpainting. Usages should be quite obvious if you read the code and configuration files carefully.
+We can interpolate between different samples (see more details in the paper). Just set `interpolation` to `true` and an appropriate `n_interpolations` under the group of `sampling` in `cifar10.yml`. We can also perform other tasks such as inpainting. Usages should be quite obvious if you read the code and configuration files carefully.
 
 ### Computing FID values quickly for a range of checkpoints
 
 We can specify `begin_ckpt` and `end_ckpt` under the `fast_fid` group in the configuration file. For example, by running the following command, we can generate a small number of samples per checkpoint within the range `begin_ckpt`-`end_ckpt` for a quick (and rough) FID evaluation.
 
 ```shell
-python main.py --fast_fid --config bedroom.yml -i bedroom
+python main.py --fast_fid --config cifar10.yml -i airplane
 ```
 
-You can find samples in `<exp>/fid_samples/bedroom`.
+You can find samples in `<exp>/fid_samples/airplane`.
 
 ## Pretrained Checkpoints
 
