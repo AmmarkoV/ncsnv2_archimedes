@@ -10,7 +10,7 @@ mkdir datasets
 cd datasets
 
 
-if [ -f cmubvh ]
+if [ -d cmubvh ]
 then
 echo "CMU BVH datasets appear to have been downloaded.."
 else
