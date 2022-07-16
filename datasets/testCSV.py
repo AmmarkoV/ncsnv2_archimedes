@@ -200,7 +200,7 @@ if __name__ == '__main__':
 
     os.system('./getCMUBVH.sh') 
 
-    data2D = readCSVFile("2d_body_all.csv")
+    data2D = readCSVFile("../exp/datasets/cmubvh/2d_body_all.csv")
     print("DATA 2D : ",data2D['label'])
 
     #Get stats for all 2D joints      
@@ -219,7 +219,7 @@ if __name__ == '__main__':
         print("Statistics of Output ",title_string)
 
 
-    data3D = readCSVFile("3d_body_all.csv")
+    data3D = readCSVFile("../exp/datasets/cmubvh/3d_body_all.csv")
     print("DATA 3D : ",data3D['label'])
 
     #Get stats for all 3D joints      
