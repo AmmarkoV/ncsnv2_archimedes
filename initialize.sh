@@ -5,6 +5,8 @@ cd "$DIR"
 
 ORIG_DIR=`pwd`
 
+sudo apt install libkrb5-dev libpq-dev
+
 
 python3 -m venv ncsnv2Env
 source ncsnv2Env/bin/activate
