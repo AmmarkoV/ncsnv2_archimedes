@@ -1,5 +1,12 @@
+# Extentions
 *.gif
 *.pdf
+
+# Directories
 exp/
+env/
 .idea/
+.vscode/
+
+# Files
 __pycache__
