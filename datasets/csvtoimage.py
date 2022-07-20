@@ -21,12 +21,13 @@ def csvToImage(data3D,data2D,sampleID):
        if (xLabel in data2D["label"]) and ( yLabel in data2D["label"]):
          idxX = data2D["label"].index(xLabel)
          idxY = data2D["label"].index(yLabel)
-         x2D  = data2D["body"][sampleID][idxX]
-         y2D  = data2D["body"][sampleID][idxY]
+         x2D  = int(32*data2D["body"][sampleID][idxX])
+         y2D  = int(32*data2D["body"][sampleID][idxY])
          idxZ = data3D["label"].index(zLabel)
          z3D  = data3D["body"][sampleID][idxZ]
          print(xLabel,",",yLabel," => ", x2D, y2D, z3D)
-         img[0][]
+         img[0][y2D][x2D]=255
+    return img
 
 
 if __name__ == "__main__":
