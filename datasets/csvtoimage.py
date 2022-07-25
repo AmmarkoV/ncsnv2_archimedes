@@ -118,8 +118,10 @@ def getJointCoordinates(
                         joint3DBodyList,
                         #----------------
                         label,
+                        #----------------
                         width,
                         height,
+                        #----------------
                         sampleID
                        ):
        xLabel = "2DX_"+label
@@ -130,15 +132,16 @@ def getJointCoordinates(
          idxX = joint2DLabelList.index(xLabel)
          idxY = joint2DLabelList.index(yLabel)
          idxZ = joint3DLabelList.index(zLabel)
-
-         x2D  = max(width-1 ,int(width*joint2DBodyList[sampleID][idxX]))
-         y2D  = max(height-1,int(height*joint2DBodyList[sampleID][idxY]))
+        
+         x2D  = int(min(width-1 ,width*joint2DBodyList[sampleID][idxX]))
+         y2D  = int(min(height-1,height*joint2DBodyList[sampleID][idxY]))
          z3D  = int(joint3DBodyList[sampleID][idxZ])
 
-         print("getJointCoordinates ",xLabel,",",yLabel," => ", x2D, y2D, z3D)
-         valueToColor = int(z3D * 255 / (-400))
+         #print("getJointCoordinates ",xLabel,",",yLabel," => ", x2D, y2D, z3D)
+         valueToColor = min(255,int(z3D * 255 / (-400)))
+         #print("  val ", valueToColor)
          return x2D,y2D,valueToColor
-       print("getJointCoordinates could not find ",xLabel,",",yLabel," ")
+       #print("getJointCoordinates could not find ",xLabel,",",yLabel," ")
        return 0,0,0
 
 
@@ -154,38 +157,44 @@ def csvToImage(data3D,data2D,sampleID, width=32, height=32):
        labels.append(tokens[1])
       if (len(tokens)==3):
        labels.append(tokens[1]+'_'+tokens[2])
-    print("Labels ",labels)
+    #print("Labels ",labels)
 
     for label in labels:
        x2D,y2D,val        = getJointCoordinates(data2D["label"],data2D["body"],data3D["label"],data3D["body"],label,width,height,sampleID)
        img[y2D][x2D][0]   = val
+       #print("img[",y2D,"][",x2D,"]=",val)
 
        xP2D,yP2D,Pval     = getJointCoordinates(data2D["label"],data2D["body"],data3D["label"],data3D["body"],parentList[label],width,height,sampleID)
        img[yP2D][xP2D][1] = Pval
        
-       """
-       x,y,r = draw_line(x2D,y2D,xP2D,yP2D)
-       #x,y,r = weighted_line(x2D,y2D,xP2D,yP2D,5)
-       print(r)
-       print(x)
-       print(y)
-       img[y][x][2] = 255 #int(r*255)
-       """
+       if (x2D!=0) and (y2D!=0) and (xP2D!=0) and (yP2D!=0):
+        y,x,r = draw_line(y2D,x2D,yP2D,xP2D)
+        #print(x)
+        #print(y)
+        #print(r)
+        if (type(x)==int):
+         img[y][x][2] = 255 #int(r*255)
+        else:
+         for i in range(0,len(y)):
+           img[y[i]][x[i]][2] = 255 #int(r*255)
+
+       #img[y][x][2] = 255 #int(r*255)
 
     return img
 
 
 if __name__ == "__main__":
-    pose2d=csvutils.readCSVFile("exp/datasets/cmubvh/2d_body_all.csv",memPercentage=100)
-    pose3d=csvutils.readCSVFile("exp/datasets/cmubvh/3d_body_all.csv",memPercentage=100)
+    poses      = 100 
+    resolution = 100#150
 
-    poses = 100 
-    res = 150
+    pose2d=csvutils.readCSVFile("exp/datasets/cmubvh/2d_body_all.csv",memPercentage=poses)
+    pose3d=csvutils.readCSVFile("exp/datasets/cmubvh/3d_body_all.csv",memPercentage=poses)
+
 
 
     for p in range(poses):
 
-      img = csvToImage(pose3d, pose2d, p, res, res)
+      img = csvToImage(pose3d, pose2d, p, resolution, resolution)
 
       fig = plt.imshow(img)
       # fig.axes.get_xaxis().set_visible(False)
