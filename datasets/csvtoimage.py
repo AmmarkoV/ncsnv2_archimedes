@@ -110,7 +110,18 @@ def weighted_line(r0, c0, r1, c1, w, rmin=0, rmax=np.inf):
 
     return (yy[mask].astype(int), xx[mask].astype(int), vals[mask])
 
-def getJointCoordinates(joint2DLabelList,joint2DBodyList,joint3DLabelList,joint3DBodyList,label,width,height,sampleID):
+def getJointCoordinates(
+                        joint2DLabelList,
+                        joint2DBodyList,
+                        #----------------
+                        joint3DLabelList,
+                        joint3DBodyList,
+                        #----------------
+                        label,
+                        width,
+                        height,
+                        sampleID
+                       ):
        xLabel = "2DX_"+label
        yLabel = "2DY_"+label
        zLabel = "3DZ_"+label
@@ -120,13 +131,14 @@ def getJointCoordinates(joint2DLabelList,joint2DBodyList,joint3DLabelList,joint3
          idxY = joint2DLabelList.index(yLabel)
          idxZ = joint3DLabelList.index(zLabel)
 
-         x2D  = int(width*joint2DBodyList[sampleID][idxX])
-         y2D  = int(height*joint2DBodyList[sampleID][idxY])
+         x2D  = max(width-1 ,int(width*joint2DBodyList[sampleID][idxX]))
+         y2D  = max(height-1,int(height*joint2DBodyList[sampleID][idxY]))
          z3D  = int(joint3DBodyList[sampleID][idxZ])
 
-         print(xLabel,",",yLabel," => ", x2D, y2D, z3D)
+         print("getJointCoordinates ",xLabel,",",yLabel," => ", x2D, y2D, z3D)
          valueToColor = int(z3D * 255 / (-400))
          return x2D,y2D,valueToColor
+       print("getJointCoordinates could not find ",xLabel,",",yLabel," ")
        return 0,0,0
 
 
@@ -135,32 +147,30 @@ def csvToImage(data3D,data2D,sampleID, width=32, height=32):
     img = np.zeros((width,height,3))
 
     labels = list()
+    #Gather all labels from our 3D data
     for label in data3D["label"]:
-
       tokens = label.split('_')
-
       if (len(tokens)==2):
        labels.append(tokens[1])
-
       if (len(tokens)==3):
        labels.append(tokens[1]+'_'+tokens[2])
-
     print("Labels ",labels)
 
     for label in labels:
-       x2D,y2D,val      = getJointCoordinates(data2D["label"],data2D["body"],data3D["label"],data3D["body"],label,width,height,sampleID)
-       img[y2D][x2D][0] = val
+       x2D,y2D,val        = getJointCoordinates(data2D["label"],data2D["body"],data3D["label"],data3D["body"],label,width,height,sampleID)
+       img[y2D][x2D][0]   = val
 
-       xP2D,yP2D,Pval   = getJointCoordinates(data2D["label"],data2D["body"],data3D["label"],data3D["body"],parentList[label],width,height,sampleID)
-       img[y2D][x2D][1] = val
-
+       xP2D,yP2D,Pval     = getJointCoordinates(data2D["label"],data2D["body"],data3D["label"],data3D["body"],parentList[label],width,height,sampleID)
+       img[yP2D][xP2D][1] = Pval
+       
+       """
        x,y,r = draw_line(x2D,y2D,xP2D,yP2D)
        #x,y,r = weighted_line(x2D,y2D,xP2D,yP2D,5)
        print(r)
        print(x)
        print(y)
-       img[x][y][2] = 255 #int(r*255)
-
+       img[y][x][2] = 255 #int(r*255)
+       """
 
     return img
 
