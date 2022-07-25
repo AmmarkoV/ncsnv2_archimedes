@@ -157,28 +157,30 @@ def csvToImage(data3D,data2D,sampleID, width=32, height=32):
        labels.append(tokens[1])
       if (len(tokens)==3):
        labels.append(tokens[1]+'_'+tokens[2])
-    #print("Labels ",labels)
+    print("Labels ",labels)
 
     for label in labels:
        x2D,y2D,val        = getJointCoordinates(data2D["label"],data2D["body"],data3D["label"],data3D["body"],label,width,height,sampleID)
-       img[y2D][x2D][0]   = val
-       #print("img[",y2D,"][",x2D,"]=",val)
-
        xP2D,yP2D,Pval     = getJointCoordinates(data2D["label"],data2D["body"],data3D["label"],data3D["body"],parentList[label],width,height,sampleID)
-       img[yP2D][xP2D][1] = Pval
        
        if (x2D!=0) and (y2D!=0) and (xP2D!=0) and (yP2D!=0):
         y,x,r = draw_line(y2D,x2D,yP2D,xP2D)
-        #print(x)
-        #print(y)
-        #print(r)
         if (type(x)==int):
-         img[y][x][2] = 255 #int(r*255)
+         #img[y][x][0] = int(r*255)
+         #img[y][x][1] = int(r*255)
+         img[y][x][2] = int(r*255)
         else:
          for i in range(0,len(y)):
-           img[y[i]][x[i]][2] = 255 #int(r*255)
+           #img[y[i]][x[i]][0] = int(r[i]*255)
+           #img[y[i]][x[i]][1] = int(r[i]*255)
+           img[y[i]][x[i]][2] = int(r[i]*255)
 
-       #img[y][x][2] = 255 #int(r*255)
+       img[y2D][x2D][0]   = val
+       img[y2D][x2D][1]   = val
+       #img[y2D][x2D][2]   = val
+       img[yP2D][xP2D][0] = Pval
+       img[yP2D][xP2D][1] = Pval
+       #img[yP2D][xP2D][2] = Pval
 
     return img
 
@@ -189,8 +191,6 @@ if __name__ == "__main__":
 
     pose2d=csvutils.readCSVFile("exp/datasets/cmubvh/2d_body_all.csv",memPercentage=poses)
     pose3d=csvutils.readCSVFile("exp/datasets/cmubvh/3d_body_all.csv",memPercentage=poses)
-
-
 
     for p in range(poses):
       print("Dumping pose ",p)
