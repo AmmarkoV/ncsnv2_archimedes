@@ -193,7 +193,7 @@ if __name__ == "__main__":
 
 
     for p in range(poses):
-
+      print("Dumping pose ",p)
       img = csvToImage(pose3d, pose2d, p, resolution, resolution)
 
       fig = plt.imshow(img)
