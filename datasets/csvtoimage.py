@@ -152,7 +152,7 @@ def getJointCoordinates(
 
 
 def csvToImage(data3D,data2D,sampleID, width=32, height=32):
-    img = np.zeros((width,height,3))
+    img = np.zeros((width,height,3),dtype=np.uint8)
 
     labels = list()
     #Gather all labels from our 3D data
