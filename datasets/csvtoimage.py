@@ -162,7 +162,7 @@ def csvToImage(data3D,data2D,sampleID, width=32, height=32):
        labels.append(tokens[1])
       if (len(tokens)==3):
        labels.append(tokens[1]+'_'+tokens[2])
-    print("Labels ",labels)
+    #print("Labels ",labels)
 
     for label in labels:
        x2D,y2D,val        = getJointCoordinates(data2D["label"],data2D["body"],data3D["label"],data3D["body"],label,width,height,sampleID)
