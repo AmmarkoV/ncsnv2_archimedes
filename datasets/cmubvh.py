@@ -32,12 +32,12 @@ class CMUBVH(Dataset):
     def __getitem__(self, idx):
         #_____________________________________________
         data3D = dict()
-        data3D["labels"]=self.data3d.iloc[idx].columns
-        data3D["body"]=self.data3d.iloc[idx].values
+        data3D["label"] = list(self.data3d.columns)
+        data3D["body"] = self.data3d.iloc[idx].values
         #_____________________________________________
         data2D = dict()
-        data2D["labels"]=self.data2d.iloc[idx].columns
-        data2D["body"]=self.data2d.iloc[idx].values
+        data2D["label"] = list(self.data2d.columns)
+        data2D["body"] = self.data2d.iloc[idx].values
         #_____________________________________________
         return csvToImage(data3D,data2D, idx, self.res, self.res)
 
