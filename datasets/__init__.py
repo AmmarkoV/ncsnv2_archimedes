@@ -34,8 +34,8 @@ def get_dataset(args, config):
                                transform=test_transform)
     
     elif config.data.dataset == 'CMUBVH':
-        dataset = CMUBVH(os.path.join(args.exp, 'datasets', 'cmubvh'), train=False)
-        test_dataset = CMUBVH(os.path.join(args.exp, 'datasets', 'cmubvh'), train=True)
+        dataset = CMUBVH(os.path.join(args.exp, 'datasets', 'cmubvh'), train=False, res=config.data.image_size)
+        test_dataset = CMUBVH(os.path.join(args.exp, 'datasets', 'cmubvh'), train=True, res=config.data.image_size)
 
     elif config.data.dataset == 'CELEBA':
         if config.data.random_flip:
