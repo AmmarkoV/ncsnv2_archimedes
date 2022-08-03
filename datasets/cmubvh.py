@@ -40,7 +40,9 @@ class CMUBVH(Dataset):
         data2D["label"] = list(self.data2d.columns)
         data2D["body"] = self.data2d.iloc[idx].values
         #_____________________________________________
-        return csvToImage(data3D,data2D, idx, self.res, self.res)
+
+        # dummy label -1.
+        return csvToImage(data3D,data2D, idx, self.res, self.res), -1
 
 
 if __name__ == "__main__":
@@ -49,7 +51,7 @@ if __name__ == "__main__":
     dataloader = DataLoader(dataset, batch_size=1, shuffle=True)
     os.system("rm debug/*.png")
 
-    for idx, batch in enumerate(dataloader):
+    for idx, (batch, _) in enumerate(dataloader):
 
       fig = plt.imshow(batch.squeeze())
       # fig.axes.get_xaxis().set_visible(False)
