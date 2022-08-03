@@ -30,7 +30,16 @@ class CMUBVH(Dataset):
         return self.data2d.shape[0] 
 
     def __getitem__(self, idx):
-        return csvToImage(self.data3d.iloc[idx].values, self.data2d.iloc[idx].values, idx, self.res, self.res)
+        #_____________________________________________
+        data3D = dict()
+        data3D["labels"]=self.data3d.iloc[idx].columns
+        data3D["body"]=self.data3d.iloc[idx].values
+        #_____________________________________________
+        data2D = dict()
+        data2D["labels"]=self.data2d.iloc[idx].columns
+        data2D["body"]=self.data2d.iloc[idx].values
+        #_____________________________________________
+        return csvToImage(data3D,data2D, idx, self.res, self.res)
 
 
 if __name__ == "__main__":
@@ -42,5 +51,5 @@ if __name__ == "__main__":
       fig = plt.imshow(batch)
       # fig.axes.get_xaxis().set_visible(False)
       # fig.axes.get_yaxis().set_visible(False)
-      plt.savefig(f'debug/pose{p}.png')
+      plt.savefig(f'debug/pose{idx}.png')
       plt.cla()
