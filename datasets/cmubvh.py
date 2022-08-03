@@ -3,7 +3,7 @@ import pandas as pd
 from torch.utils.data import Dataset, DataLoader
 
 
-class CMUBVH3d(Dataset):
+class CMUBVH(Dataset):
     def __init__(self, path, train=True, split=0.05, transform=None):
         bmuvhrows = 1505224
         testrows = int(bmuvhrows * split)
@@ -26,7 +26,7 @@ class CMUBVH3d(Dataset):
 if __name__ == "__main__":
     path = "exp/datasets/cmubvh/3d_body_all.csv"
 
-    dataset = CMUBVH3d(path, train=False)
+    dataset = CMUBVH(path, train=False)
     dataloader = DataLoader(dataset, batch_size=64, shuffle=True)
     for idx, batch in enumerate(dataloader):
         print(f'idx: {idx}')
