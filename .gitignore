@@ -5,6 +5,7 @@
 # Directories
 exp/
 env/
+ncsnv2Env/
 .idea/
 .vscode/
 debug/

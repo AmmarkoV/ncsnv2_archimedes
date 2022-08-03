@@ -1,4 +1,4 @@
-import datasets.csvutils 
+import datasets.csvutils as csvutils 
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -152,7 +152,7 @@ def getJointCoordinates(
 
 
 def csvToImage(data3D,data2D,sampleID, width=32, height=32):
-    img = np.zeros((width,height,3),dtype=np.uint8)
+    img = np.zeros((3,width,height))
 
     labels = list()
     #Gather all labels from our 3D data
@@ -178,21 +178,17 @@ def csvToImage(data3D,data2D,sampleID, width=32, height=32):
         
         y,x,r = draw_line(y2D,x2D,yP2D,xP2D)
         if (type(x)==int):
-         #img[y][x][0] = int(r*255)
-         #img[y][x][1] = int(r*255)
-         img[y][x][2] = int(r*255)
+         img[2][y][x] = r
         else:
          for i in range(0,len(y)):
-           #img[y[i]][x[i]][0] = int(r[i]*255)
-           #img[y[i]][x[i]][1] = int(r[i]*255)
-           img[y[i]][x[i]][2] = int(r[i]*255)
+           img[2][y[i]][x[i]] = r[i]
 
-       img[y2D][x2D][0]   = val
-       img[y2D][x2D][1]   = val
-       #img[y2D][x2D][2]   = val
-       img[yP2D][xP2D][0] = Pval
-       img[yP2D][xP2D][1] = Pval
-       #img[yP2D][xP2D][2] = Pval
+       #-------------------------
+       img[0][y2D][x2D]   = val
+       img[1][y2D][x2D]   = val
+       #-------------------------
+       img[0][yP2D][xP2D] = Pval
+       img[1][yP2D][xP2D] = Pval 
 
     return img
 

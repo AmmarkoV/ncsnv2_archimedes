@@ -1,4 +1,4 @@
-import time
+import torch
 import os
 import pandas as pd
 from datasets.csvtoimage import csvToImage
@@ -42,7 +42,7 @@ class CMUBVH(Dataset):
         #_____________________________________________
 
         # dummy label -1.
-        return csvToImage(data3D,data2D, idx, self.res, self.res), -1
+        return torch.tensor(csvToImage(data3D,data2D, idx, self.res, self.res), dtype=torch.float), -1
 
 
 if __name__ == "__main__":

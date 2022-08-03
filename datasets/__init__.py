@@ -28,14 +28,14 @@ def get_dataset(args, config):
         ])
 
     if config.data.dataset == 'CIFAR10':
-        dataset = CIFAR10(os.path.join(args.exp, 'datasets', 'cifar10'), train=True, download=True,
-                          transform=tran_transform)
-        test_dataset = CIFAR10(os.path.join(args.exp, 'datasets', 'cifar10_test'), train=False, download=True,
-                               transform=test_transform)
+        dataset = CIFAR10(os.path.join(args.exp, 'datasets', 'cifar10'), train=True, download=True,transform=tran_transform)
+        test_dataset = CIFAR10(os.path.join(args.exp, 'datasets', 'cifar10_test'), train=False, download=True,transform=test_transform)
     
     elif config.data.dataset == 'CMUBVH':
-        dataset = CMUBVH(os.path.join(args.exp, 'datasets', 'cmubvh'), train=False, res=config.data.image_size)
-        test_dataset = CMUBVH(os.path.join(args.exp, 'datasets', 'cmubvh'), train=True, res=config.data.image_size)
+#        dataset = CMUBVH(os.path.join(args.exp, 'datasets', 'cmubvh'), train=True, res=config.data.image_size)
+#        test_dataset = CMUBVH(os.path.join(args.exp, 'datasets', 'cmubvh_test'), train=False, res=config.data.image_size)
+        dataset = CMUBVH(train=True, res=config.data.image_size)
+        test_dataset = CMUBVH(train=False, res=config.data.image_size)
 
     elif config.data.dataset == 'CELEBA':
         if config.data.random_flip:
