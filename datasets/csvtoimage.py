@@ -133,10 +133,15 @@ def getJointCoordinates(
          idxY = joint2DLabelList.index(yLabel)
          idxZ = joint3DLabelList.index(zLabel)
         
-         x2D  = int(min(width-1 ,width*joint2DBodyList[sampleID][idxX]))
-         y2D  = int(min(height-1,height*joint2DBodyList[sampleID][idxY]))
-         z3D  = int(joint3DBodyList[sampleID][idxZ])
-
+         if (len(joint2DBodyList.shape)==1):
+          x2D  = int(min(width-1 ,width*joint2DBodyList[idxX]))
+          y2D  = int(min(height-1,height*joint2DBodyList[idxY]))
+          z3D  = int(joint3DBodyList[idxZ])
+         else:
+          x2D  = int(min(width-1 ,width*joint2DBodyList[sampleID][idxX]))
+          y2D  = int(min(height-1,height*joint2DBodyList[sampleID][idxY]))
+          z3D  = int(joint3DBodyList[sampleID][idxZ])
+        
          #print("getJointCoordinates ",xLabel,",",yLabel," => ", x2D, y2D, z3D)
          valueToColor = min(255,int(z3D * 255 / (-400)))
          #print("  val ", valueToColor)
