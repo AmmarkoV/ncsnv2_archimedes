@@ -1,7 +1,7 @@
 import time
 import os
 import pandas as pd
-from csvtoimage import csvToImage
+from datasets.csvtoimage import csvToImage
 from torch.utils.data import Dataset, DataLoader
 import matplotlib.pyplot as plt
 
