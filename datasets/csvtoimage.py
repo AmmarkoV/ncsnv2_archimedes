@@ -169,6 +169,13 @@ def csvToImage(data3D,data2D,sampleID, width=32, height=32):
        xP2D,yP2D,Pval     = getJointCoordinates(data2D["label"],data2D["body"],data3D["label"],data3D["body"],parentList[label],width,height,sampleID)
        
        if (x2D!=0) and (y2D!=0) and (xP2D!=0) and (yP2D!=0):
+        #Horrible hack to not get out of bounds
+        x2D  = min(width-2,x2D)
+        y2D  = min(height-2,y2D)
+        xP2D = min(width-2,xP2D)
+        yP2D = min(height-2,yP2D)
+        #---------------------------
+        
         y,x,r = draw_line(y2D,x2D,yP2D,xP2D)
         if (type(x)==int):
          #img[y][x][0] = int(r*255)
