@@ -151,11 +151,11 @@ def getJointCoordinates(
 
 
 
-def csvToImage(data3D,data2D,sampleID, width=32, height=32):
+def csvToImage(data3D,data2D,sampleID, width=32, height=32, bkg=0.5):
     #First failed experiment with zeros!
     #img = np.zeros((3,width,height))
     #Second experiment will use 0.5 as background
-    img = np.full((3,width,height),0.5)
+    img = np.full((3,width,height),bkg)
 
     labels = list()
     #Gather all labels from our 3D data
@@ -206,8 +206,10 @@ if __name__ == "__main__":
     for p in range(poses):
       print("Dumping pose ",p)
       img = csvToImage(pose3d, pose2d, p, resolution, resolution)
-
-      fig = plt.imshow(img)
+      
+      imgSwapped = np.swapaxes(img,0,2)
+      imgSwapped = np.swapaxes(imgSwapped,0,1)
+      fig = plt.imshow(imgSwapped)
       # fig.axes.get_xaxis().set_visible(False)
       # fig.axes.get_yaxis().set_visible(False)
       plt.savefig(f'debug/pose{p}.png')

@@ -50,10 +50,13 @@ if __name__ == "__main__":
     dataset = CMUBVH(train=False)
     dataloader = DataLoader(dataset, batch_size=1, shuffle=True)
     os.system("rm debug/*.png")
+    import numpy as np
 
     for idx, (batch, _) in enumerate(dataloader):
 
-      fig = plt.imshow(batch.squeeze())
+      batchSwapped = np.swapaxes(batch.squeeze(),0,2)
+      batchSwapped = np.swapaxes(batchSwapped,0,1)
+      fig = plt.imshow(batchSwapped)
       # fig.axes.get_xaxis().set_visible(False)
       # fig.axes.get_yaxis().set_visible(False)
       plt.savefig(f'debug/pose{idx}.png')
