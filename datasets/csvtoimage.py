@@ -158,8 +158,12 @@ def csvToImage(data3D,data2D,sampleID, width=32, height=32, rnd=False, bkg=0.5):
     if not rnd:
         img = np.full((3,width,height),bkg)
     else:
-        img = np.random.uniform(low=0.0, high=1.0, size=(3,width,height))
-
+        #All pixels random 
+        #img = np.random.uniform(low=0.0, high=1.0, size=(3,width,height))
+        #Only background pixels random 
+        bkg = np.random.rand()
+        img = np.full((3,width,height),bkg)
+        
     labels = list()
     #Gather all labels from our 3D data
     for label in data3D["label"]:
