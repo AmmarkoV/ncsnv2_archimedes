@@ -151,7 +151,7 @@ def getJointCoordinates(
 
 
 
-def csvToImage(data3D,data2D,sampleID, width=32, height=32, rnd=False, bkg=0.5):
+def csvToImage(data3D,data2D,sampleID, width=32, height=32, rnd=True, bkg=0.5):
     #First failed experiment with zeros!
     #img = np.zeros((3,width,height))
     #Second experiment will use 0.5 as background
