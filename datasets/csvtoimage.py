@@ -151,7 +151,7 @@ def getJointCoordinates(
 
 
 
-def csvToImage(data3D,data2D,sampleID, width=32, height=32, rnd=True, bkg=0.5):
+def csvToImage(data3D,data2D,sampleID, width=32, height=32, rnd=True, translationInvariant=True, bkg=0.5):
     #First failed experiment with zeros!
     #img = np.zeros((3,width,height))
     #Second experiment will use 0.5 as background
@@ -174,31 +174,49 @@ def csvToImage(data3D,data2D,sampleID, width=32, height=32, rnd=True, bkg=0.5):
        labels.append(tokens[1]+'_'+tokens[2])
     #print("Labels ",labels)
 
+    #Default Alignment
+    alignX2D = 0
+    alignY2D = 0
+    if (translationInvariant):
+       x2D,y2D,val = getJointCoordinates(data2D["label"],data2D["body"],data3D["label"],data3D["body"],"hip",width,height,sampleID)
+       alignX2D = (width/2)  - x2D
+       alignY2D = (height/2) - y2D 
+     
+
     for label in labels:
        x2D,y2D,val        = getJointCoordinates(data2D["label"],data2D["body"],data3D["label"],data3D["body"],label,width,height,sampleID)
        xP2D,yP2D,Pval     = getJointCoordinates(data2D["label"],data2D["body"],data3D["label"],data3D["body"],parentList[label],width,height,sampleID)
+ 
+       #Do alignment
+       if (x2D!=0) and (y2D!=0) and (xP2D!=0) and (yP2D!=0):
+        x2D  = int(x2D  + alignX2D)
+        y2D  = int(y2D  + alignY2D)
+        xP2D = int(xP2D + alignX2D)
+        yP2D = int(yP2D + alignY2D)
        
        if (x2D!=0) and (y2D!=0) and (xP2D!=0) and (yP2D!=0):
         #Horrible hack to not get out of bounds
-        x2D  = min(width-2,x2D)
-        y2D  = min(height-2,y2D)
-        xP2D = min(width-2,xP2D)
-        yP2D = min(height-2,yP2D)
+        x2D  = int(min(width-2 ,x2D ))
+        y2D  = int(min(height-2,y2D ))
+        xP2D = int(min(width-2 ,xP2D))
+        yP2D = int(min(height-2,yP2D))
         #---------------------------
         
         y,x,r = draw_line(y2D,x2D,yP2D,xP2D)
-        if (type(x)==int):
+        if (type(y)==float) or (type(y)==int):
+         img[2][y][x] = r
+        elif (type(x)==float) or (type(x)==int):
          img[2][y][x] = r
         else:
          for i in range(0,len(y)):
            img[2][y[i]][x[i]] = r[i]
 
-       #-------------------------
-       img[0][y2D][x2D]   = val
-       img[1][y2D][x2D]   = val
-       #-------------------------
-       img[0][yP2D][xP2D] = Pval
-       img[1][yP2D][xP2D] = Pval 
+        #-------------------------
+        img[0][y2D][x2D]   = val
+        img[1][y2D][x2D]   = val
+        #-------------------------
+        #img[0][yP2D][xP2D] = Pval
+        #img[1][yP2D][xP2D] = Pval 
 
     return img
 
@@ -212,7 +230,7 @@ if __name__ == "__main__":
 
     for p in range(poses):
       print("Dumping pose ",p)
-      img = csvToImage(pose3d, pose2d, p, resolution, resolution, rnd=True)
+      img = csvToImage(pose3d, pose2d, p, resolution, resolution)
       
       imgSwapped = np.swapaxes(img,0,2)
       imgSwapped = np.swapaxes(imgSwapped,0,1)
