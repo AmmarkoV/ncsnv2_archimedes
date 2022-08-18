@@ -162,7 +162,10 @@ def csvToImage(data3D,data2D,sampleID, width=32, height=32, rnd=True, translatio
         #img = np.random.uniform(low=0.0, high=1.0, size=(3,width,height))
         #Only background pixels random 
         bkg = np.random.rand()
+        bkg2 = np.random.rand()
         img = np.full((3,width,height),bkg)
+        for y in range(0,height):
+          img[:,:,y]=float(y*(abs(bkg2-bkg)/height))
         
     labels = list()
     #Gather all labels from our 3D data
