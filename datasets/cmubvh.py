@@ -6,6 +6,13 @@ from torch.utils.data import Dataset, DataLoader
 import matplotlib.pyplot as plt
 
 
+def readFirstLineOfFile(filename):
+ with open(filename) as f:
+    lines = f.read() ##Assume the sample file has 3 lines
+    first = lines.split('\n', 1)[0]
+    return first
+ return list()
+
 class CMUBVH(Dataset):
     def __init__(self, train=True, split=0.05, res=32, transform=None):
         self.res = res
@@ -21,11 +28,12 @@ class CMUBVH(Dataset):
             skiprows = nrows
             nrows = bmuvhrows - skiprows
 
+        self.data3dLabels = readFirstLineOfFile(path3d)
+        self.data2dLabels = readFirstLineOfFile(path2d)
+
         self.data2d = pd.read_csv(path2d, nrows=nrows, skiprows=skiprows)
         self.data3d = pd.read_csv(path3d, nrows=nrows, skiprows=skiprows)
-
-        self.data3dLabels = list(self.data3d.head(1))
-        self.data2dLabels = list(self.data2d.head(1))
+ 
         print("3D Labels = ",self.data3dLabels)
         print("2D Labels = ",self.data2dLabels)
         import sys
