@@ -265,7 +265,12 @@ def csvToImage(data3D,data2D,sampleID, width=32, height=32, rnd=True, translatio
        labels.append(tokens[1])
       if (len(tokens)==3):
        labels.append(tokens[1]+'_'+tokens[2])
+    labels = list(set(labels))
     #print("Labels ",labels)
+
+    if (len(labels)==0):
+      print("Sample ",sampleID," is empty")
+      return img
 
     #Default Alignment
     alignX2D = 0

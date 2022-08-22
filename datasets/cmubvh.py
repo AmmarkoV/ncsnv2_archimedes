@@ -41,6 +41,9 @@ class CMUBVH(Dataset):
         data2D["body"] = self.data2d.iloc[idx].values
         #_____________________________________________
 
+        print("GetItem(",idx,") =>  data2d[label]=",data2D["label"]," data2d[body]=",data2D["body"]) 
+        print("GetItem(",idx,") =>  data3D[label]=",data3D["label"]," data3D[body]=",data3D["body"]) 
+
         # dummy label -1.
         return torch.tensor(csvToImage(data3D,data2D, idx, self.res, self.res), dtype=torch.float), -1
 
