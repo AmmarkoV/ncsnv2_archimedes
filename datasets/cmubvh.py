@@ -10,7 +10,7 @@ def readFirstLineOfFile(filename):
  with open(filename) as f:
     lines = f.read() ##Assume the sample file has 3 lines
     first = lines.split('\n', 1)[0]
-    return first
+    return first.split(',')
  return list()
 
 class CMUBVH(Dataset):
@@ -35,9 +35,7 @@ class CMUBVH(Dataset):
         self.data3d = pd.read_csv(path3d, nrows=nrows, skiprows=skiprows)
  
         print("3D Labels = ",self.data3dLabels)
-        print("2D Labels = ",self.data2dLabels)
-        import sys
-        sys.exit(0)
+        print("2D Labels = ",self.data2dLabels) 
 
     def __len__(self):
         assert(len(self.data3dLabels) == self.data3d.shape[0])
