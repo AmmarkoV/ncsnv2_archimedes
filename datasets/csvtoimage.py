@@ -167,19 +167,19 @@ def getJointCoordinatesNormalize(
                         sampleID
                        ):
   x2D,y2D,val = getJointCoordinates(
-                                             joint2DLabelList,
-                                             joint2DBodyList,
-                                             #----------------
-                                             joint3DLabelList,
-                                             joint3DBodyList,
-                                             #----------------
-                                             label,
-                                             #----------------
-                                             width,
-                                             height,
-                                             #----------------
-                                             sampleID
-                                            )
+                                    joint2DLabelList,
+                                    joint2DBodyList,
+                                    #----------------
+                                    joint3DLabelList,
+                                    joint3DBodyList,
+                                    #----------------
+                                    label,
+                                    #----------------
+                                    width,
+                                    height,
+                                    #----------------
+                                    sampleID
+                                   )
   return float(x2D/width),float(y2D/height),float(val/255)
 
 
@@ -203,10 +203,11 @@ def csvToImageEncoding(data3D,data2D,sampleID, width=32, height=32):
     #print("Labels ",labels)
  
     if (len(labels)==0):
+      print("Sample ",sampleID," is empty")
       return img
 
     widthPerJoint  = int(width/3)
-    heightPerJoint = int(height/len(labels))
+    heightPerJoint = int(max(1,height/len(labels)))
     #print(widthPerJoint,"/",heightPerJoint)
    
     yS = 0
@@ -214,13 +215,18 @@ def csvToImageEncoding(data3D,data2D,sampleID, width=32, height=32):
        xS = 0
        x2D,y2D,val = getJointCoordinatesNormalize(data2D["label"],data2D["body"],data3D["label"],data3D["body"],label,width,height,sampleID)
        #---------------------------------------------------
-       img[:,xS:xS+widthPerJoint,yS:yS+heightPerJoint]=x2D*255
+       encX = float(min(255,x2D*255))
+       img[:,xS:xS+widthPerJoint,yS:yS+heightPerJoint]=encX
        xS = xS + widthPerJoint
-       img[:,xS:xS+widthPerJoint,yS:yS+heightPerJoint]=y2D*255
+       
+       encY = float(min(255,y2D*255))
+       img[:,xS:xS+widthPerJoint,yS:yS+heightPerJoint]=encY
        xS = xS + widthPerJoint
-       img[:,xS:xS+widthPerJoint,yS:yS+heightPerJoint]=val*255
+
+       encV = float(min(255,val*255))
+       img[:,xS:xS+widthPerJoint,yS:yS+heightPerJoint]=encV
        yS = yS + heightPerJoint
-       #print("Label ",label," x=",x2D," y=",y2D," v=",val," => xS=",xS," yS=",yS)
+       #print("Label ",label," x=",x2D," y=",y2D," v=",val," => xS=",xS," yS=",yS," encX=",encX," => encY=",encY," encV=",encV)
    
     return img
 
