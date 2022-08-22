@@ -33,11 +33,11 @@ class CMUBVH(Dataset):
     def __getitem__(self, idx):
         #_____________________________________________
         data3D = dict()
-        data3D["label"] = list(self.data3d.head()) #columns has all data!
+        data3D["label"] = list(self.data3d.head(1)) #columns has all data!
         data3D["body"] = self.data3d.iloc[idx].values
         #_____________________________________________
         data2D = dict()
-        data2D["label"] = list(self.data2d.head()) #columns has all data!
+        data2D["label"] = list(self.data2d.head(1)) #columns has all data!
         data2D["body"] = self.data2d.iloc[idx].values
         #_____________________________________________
 
