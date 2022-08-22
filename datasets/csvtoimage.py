@@ -145,13 +145,93 @@ def getJointCoordinates(
          #print("getJointCoordinates ",xLabel,",",yLabel," => ", x2D, y2D, z3D)
          valueToColor = min(255,int(z3D * 255 / (-400)))
          #print("  val ", valueToColor)
+
          return x2D,y2D,valueToColor
        #print("getJointCoordinates could not find ",xLabel,",",yLabel," ")
        return 0,0,0
 
 
 
-def csvToImage(data3D,data2D,sampleID, width=32, height=32, rnd=True, translationInvariant=True, bkg=0.5):
+def getJointCoordinatesNormalize(
+                        joint2DLabelList,
+                        joint2DBodyList,
+                        #----------------
+                        joint3DLabelList,
+                        joint3DBodyList,
+                        #----------------
+                        label,
+                        #----------------
+                        width,
+                        height,
+                        #----------------
+                        sampleID
+                       ):
+  x2D,y2D,val = getJointCoordinates(
+                                             joint2DLabelList,
+                                             joint2DBodyList,
+                                             #----------------
+                                             joint3DLabelList,
+                                             joint3DBodyList,
+                                             #----------------
+                                             label,
+                                             #----------------
+                                             width,
+                                             height,
+                                             #----------------
+                                             sampleID
+                                            )
+  return float(x2D/width),float(y2D/height),float(val/255)
+
+
+
+def csvToImageEncoding(data3D,data2D,sampleID, width=32, height=32):
+    #First failed experiment with zeros!
+    #img = np.zeros((3,width,height))
+    #Second experiment will use 0.5 as background
+    img = np.full((3,width,height),0)
+
+    labels = list()
+    #Gather all labels from our 3D data
+    for label in data3D["label"]:
+      tokens = label.split('_')
+      if (len(tokens)==2):
+       labels.append(tokens[1])
+      if (len(tokens)==3):
+       labels.append(tokens[1]+'_'+tokens[2])
+    labels = list(set(labels))
+    #print("Labels ",labels)
+
+    widthPerJoint  = int(width/3)
+    heightPerJoint = int(height/len(labels))
+    #print(widthPerJoint,"/",heightPerJoint)
+   
+    yS = 0
+    for label in labels:
+       xS = 0
+       x2D,y2D,val = getJointCoordinatesNormalize(data2D["label"],data2D["body"],data3D["label"],data3D["body"],label,width,height,sampleID)
+       #---------------------------------------------------
+       img[:,xS:xS+widthPerJoint,yS:yS+heightPerJoint]=x2D*255
+       xS = xS + widthPerJoint
+       img[:,xS:xS+widthPerJoint,yS:yS+heightPerJoint]=y2D*255
+       xS = xS + widthPerJoint
+       img[:,xS:xS+widthPerJoint,yS:yS+heightPerJoint]=val*255
+       yS = yS + heightPerJoint
+       #print("Label ",label," x=",x2D," y=",y2D," v=",val," => xS=",xS," yS=",yS)
+   
+    return img
+
+
+
+
+
+
+
+
+
+def csvToImage(data3D,data2D,sampleID, width=32, height=32, rnd=True, translationInvariant=True, bkg=0.5, encoding=True):
+    if (encoding):
+        return csvToImageEncoding(data3D,data2D,sampleID,width=width,height=height)
+
     #First failed experiment with zeros!
     #img = np.zeros((3,width,height))
     #Second experiment will use 0.5 as background
@@ -161,9 +241,9 @@ def csvToImage(data3D,data2D,sampleID, width=32, height=32, rnd=True, translatio
         #All pixels random 
         #img = np.random.uniform(low=0.0, high=1.0, size=(3,width,height))
         #Only background pixels random 
-        bkg = np.random.rand()
+        bkg  = np.random.rand()
         bkg2 = np.random.rand()
-        img = np.full((3,width,height),bkg)
+        img  = np.full((3,width,height),bkg)
         for y in range(0,height):
           img[:,:,y]=float(y*(abs(bkg2-bkg)/height))
         
@@ -226,7 +306,7 @@ def csvToImage(data3D,data2D,sampleID, width=32, height=32, rnd=True, translatio
 
 if __name__ == "__main__":
     poses      = 100 
-    resolution = 100#150
+    resolution = 32#150
 
     pose2d=csvutils.readCSVFile("exp/datasets/cmubvh/2d_body_all.csv",memPercentage=poses)
     pose3d=csvutils.readCSVFile("exp/datasets/cmubvh/3d_body_all.csv",memPercentage=poses)
