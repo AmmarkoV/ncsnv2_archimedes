@@ -200,6 +200,9 @@ def csvToImageEncoding(data3D,data2D,sampleID, width=32, height=32):
        labels.append(tokens[1]+'_'+tokens[2])
     labels = list(set(labels))
     #print("Labels ",labels)
+ 
+    if (len(labels)==0):
+      return img
 
     widthPerJoint  = int(width/3)
     heightPerJoint = int(height/len(labels))
