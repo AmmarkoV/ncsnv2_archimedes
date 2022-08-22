@@ -25,6 +25,9 @@ class CMUBVH(Dataset):
         self.data2d = pd.read_csv(path2d, nrows=nrows, skiprows=skiprows)
         self.data3d = pd.read_csv(path3d, nrows=nrows, skiprows=skiprows)
 
+        self.data3dLabels = list(self.data3d.head(1))
+        self.data2dLabels = list(self.data2d.head(1))
+
     def __len__(self):
 
         assert(self.data2d.shape[0] == self.data3d.shape[0])
@@ -33,12 +36,12 @@ class CMUBVH(Dataset):
     def __getitem__(self, idx):
         #_____________________________________________
         data3D = dict()
-        data3D["label"] = list(self.data3d.head(1)) #columns has all data!
-        data3D["body"] = self.data3d.iloc[idx].values
+        data3D["label"] = self.data3dLabels
+        data3D["body"]  = self.data3d.iloc[idx].values
         #_____________________________________________
         data2D = dict()
-        data2D["label"] = list(self.data2d.head(1)) #columns has all data!
-        data2D["body"] = self.data2d.iloc[idx].values
+        data2D["label"] = self.data2dLabels
+        data2D["body"]  = self.data2d.iloc[idx].values
         #_____________________________________________
 
         print("GetItem(",idx,") =>  data2d[label]=",data2D["label"]," data2d[body]=",data2D["body"]) 
