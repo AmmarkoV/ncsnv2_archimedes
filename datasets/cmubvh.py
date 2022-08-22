@@ -28,18 +28,20 @@ class CMUBVH(Dataset):
             skiprows = nrows
             nrows = bmuvhrows - skiprows
 
+        #----------------------------------------------------------------
         self.data3dLabels = readFirstLineOfFile(path3d)
         self.data2dLabels = readFirstLineOfFile(path2d)
-
+        #----------------------------------------------------------------
         self.data2d = pd.read_csv(path2d, nrows=nrows, skiprows=skiprows)
         self.data3d = pd.read_csv(path3d, nrows=nrows, skiprows=skiprows)
- 
+        #----------------------------------------------------------------
+        print("CMU BVH Dataset Initialized ") 
         print("3D Labels = ",self.data3dLabels)
         print("2D Labels = ",self.data2dLabels) 
 
     def __len__(self):
-        assert(len(self.data3dLabels) == self.data3d.shape[0])
-        assert(len(self.data2dLabels) == self.data2d.shape[0])
+        #assert(len(self.data3dLabels) == self.data3d.shape[0]) <- this triggers
+        #assert(len(self.data2dLabels) == self.data2d.shape[0]) <- this triggers
         assert(self.data2d.shape[0] == self.data3d.shape[0])
         return self.data2d.shape[0] 
 
