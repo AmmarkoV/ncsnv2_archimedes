@@ -26,6 +26,10 @@ class CMUBVH(Dataset):
 
         self.data3dLabels = list(self.data3d.head(1))
         self.data2dLabels = list(self.data2d.head(1))
+        print("3D Labels = ",self.data3dLabels)
+        print("2D Labels = ",self.data2dLabels)
+        import sys
+        sys.exit(0)
 
     def __len__(self):
         assert(len(self.data3dLabels) == self.data3d.shape[0])
