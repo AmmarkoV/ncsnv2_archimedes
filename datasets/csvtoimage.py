@@ -188,7 +188,8 @@ def csvToImageEncoding(data3D,data2D,sampleID, width=32, height=32):
     #First failed experiment with zeros!
     #img = np.zeros((3,width,height))
     #Second experiment will use 0.5 as background
-    img = np.full((3,width,height),0)
+    bkg  = np.random.rand()
+    img = np.full((3,width,height),bkg)
 
     labels = list()
     #Gather all labels from our 3D data
