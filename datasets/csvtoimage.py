@@ -238,7 +238,7 @@ def csvToImageEncoding(data3D,data2D,sampleID, width=32, height=32):
 
 
 
-def csvToImage(data3D,data2D,sampleID, width=32, height=32, rnd=True, translationInvariant=True, bkg=0.5, encoding=True):
+def csvToImage(data3D,data2D,sampleID, width=32, height=32, rnd=True, translationInvariant=True, bkg=0.5, encoding=False):
     if (encoding):
         return csvToImageEncoding(data3D,data2D,sampleID,width=width,height=height)
 
