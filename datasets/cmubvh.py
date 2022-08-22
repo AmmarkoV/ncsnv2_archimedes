@@ -8,7 +8,6 @@ import matplotlib.pyplot as plt
 
 class CMUBVH(Dataset):
     def __init__(self, train=True, split=0.05, res=32, transform=None):
-
         self.res = res
         path2d = "exp/datasets/cmubvh/2d_body_all.csv"
         path3d = "exp/datasets/cmubvh/3d_body_all.csv"
@@ -29,7 +28,8 @@ class CMUBVH(Dataset):
         self.data2dLabels = list(self.data2d.head(1))
 
     def __len__(self):
-
+        assert(len(self.data3dLabels) == self.data3d.shape[0])
+        assert(len(self.data2dLabels) == self.data2d.shape[0])
         assert(self.data2d.shape[0] == self.data3d.shape[0])
         return self.data2d.shape[0] 
 
