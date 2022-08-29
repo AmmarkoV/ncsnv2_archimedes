@@ -233,12 +233,53 @@ def csvToImageEncoding(data3D,data2D,sampleID, width=32, height=32):
 
 
 
+def splitDepthValueToChannels(depthValue,near=0,far=500):
+   #https://sites.google.com/site/brainrobotdata/home/depth-image-encoding
+   #https://developers.google.com/depthmap-metadata/encoding
+   
+   #Make sure value is positive 
+   depthValue=abs(depthValue)
+  
+   dNorm = (depthValue - near) / (far-near) 
+   d16 = int(dNorm * 65535)
+   #Split Unsigned Short
+   upper8bits = d16 >> 8
+   lower8bits = d16 & 0b0000000011111111
+   #-------------------------------------
+   r=0
+   g=upper8bits
+   b=lower8bits
+   #-------------------------------------
+   #print("Value %0.2f | R=%0.2f G=%0.2f B=%0.2f "%(depthValue,r,g,b))
+   return r,g,b
 
 
 
+"""
+  Euclidean 2D Distance
+"""
+def distance2D(x1,y1,x2,y2):
+   return np.sqrt( ((x1-x2)*(x1-x2)) + ((y1-y2)*(y1-y2)) )
 
 
-def csvToImage(data3D,data2D,sampleID, width=32, height=32, rnd=False, translationInvariant=True, bkg=0.5, encoding=False):
+"""
+  We begin a line from (s)ource sX,sY which has a value sV
+  and draw it up to (t)arget tX,tY which has a value tV
+  This function for each currentX,currentY value will try to interpolate the value 
+  and output something depending on the closest distance. 
+"""
+def interpolateValue(sX,sY,sV,tX,tY,tV,currentX,currentY):
+   distanceToSource = distance2D(sX,sY,currentX,currentY)
+   distanceToTarget = distance2D(tX,tY,currentX,currentY)
+   distanceFull     = distance2D(sX,sY,tX,tY)
+
+   value = 0.0
+   value = value + sV * (distanceToSource/distanceFull)
+   value = value + tV * (distanceToTarget/distanceFull)
+   return value
+
+
+def csvToImage(data3D,data2D,sampleID, width=32, height=32, rnd=False, translationInvariant=True, interpolateDepth=True, bkg=0.5, encoding=False):
     if (encoding):
         return csvToImageEncoding(data3D,data2D,sampleID,width=width,height=height)
 
@@ -283,6 +324,8 @@ def csvToImage(data3D,data2D,sampleID, width=32, height=32, rnd=False, translati
 
     for label in labels:
        x2D,y2D,val        = getJointCoordinates(data2D["label"],data2D["body"],data3D["label"],data3D["body"],label,width,height,sampleID)
+       r,g,b = splitDepthValueToChannels(val)
+
        xP2D,yP2D,Pval     = getJointCoordinates(data2D["label"],data2D["body"],data3D["label"],data3D["body"],parentList[label],width,height,sampleID)
  
        #Do alignment
@@ -300,18 +343,32 @@ def csvToImage(data3D,data2D,sampleID, width=32, height=32, rnd=False, translati
         yP2D = int(min(height-2,yP2D))
         #---------------------------
         
-        y,x,r = draw_line(y2D,x2D,yP2D,xP2D)
-        if (type(y)==float) or (type(y)==int):
-         img[2][y][x] = r
+        y,x,foo = draw_line(y2D,x2D,yP2D,xP2D)
+        if (type(y)==float) or (type(y)==int): 
+         img[0][y][x] = 255 #Keypoint should be marked! r
+         img[1][y][x] = g
+         img[2][y][x] = b
         elif (type(x)==float) or (type(x)==int):
-         img[2][y][x] = r
+         img[0][y][x] = 255 #Keypoint should be marked! r
+         img[1][y][x] = g
+         img[2][y][x] = b
         else:
+         #By default a blue line between joints
+         iR = 0
+         iG = 0 
+         iB = 255
          for i in range(0,len(y)):
-           img[2][y[i]][x[i]] = r[i]
+           if (interpolateDepth):
+             interpolatedValue = interpolateValue(x2D,y2D,val,xP2D,yP2D,Pval,x[i],y[i])
+             iR,iG,iB = splitDepthValueToChannels(interpolatedValue)
+           img[0][y[i]][x[i]] = iR
+           img[1][y[i]][x[i]] = iG
+           img[2][y[i]][x[i]] = iB
 
-        #-------------------------
-        img[0][y2D][x2D]   = val
-        img[1][y2D][x2D]   = val
+        #------------------------- 
+        img[0][y2D][x2D]   = 255# Keypoint should be marked!r
+        img[1][y2D][x2D]   = g
+        img[2][y2D][x2D]   = b
         #-------------------------
         #img[0][yP2D][xP2D] = Pval
         #img[1][yP2D][xP2D] = Pval 
@@ -321,7 +378,7 @@ def csvToImage(data3D,data2D,sampleID, width=32, height=32, rnd=False, translati
 
 if __name__ == "__main__":
     poses      = 100 
-    resolution = 32#150
+    resolution = 120#150
 
     pose2d=csvutils.readCSVFile("exp/datasets/cmubvh/2d_body_all.csv",memPercentage=poses)
     pose3d=csvutils.readCSVFile("exp/datasets/cmubvh/3d_body_all.csv",memPercentage=poses)
