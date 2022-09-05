@@ -12,6 +12,8 @@ python3 -m venv ncsnv2Env
 source ncsnv2Env/bin/activate
 python3 -m pip install -r requirements.txt --extra-index-url https://download.pytorch.org/whl/cu116
 
+#pip3 install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu116
+
 mkdir debug
 mkdir -p exp/datasets
 cd exp/datasets/
