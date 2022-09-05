@@ -10,7 +10,7 @@ sudo apt install libkrb5-dev libpq-dev
 
 python3 -m venv ncsnv2Env
 source ncsnv2Env/bin/activate
-python3 -m pip install -r requirements.txt
+python3 -m pip install -r requirements.txt --extra-index-url https://download.pytorch.org/whl/cu116
 
 mkdir debug
 mkdir -p exp/datasets
