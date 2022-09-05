@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# This script builds and runs a docker image for local use.
+
+dockerfile_pth=/home/kostis/Desktop/MSC/komod/CODE/docker/local
+mount_pth=/home/kostis/Desktop/MSC/komod/CODE
+
+# update tensorflow image
+docker pull tensorflow/tensorflow:latest-gpu
+
+# build and run tensorflow
+docker build \
+	-t tf_torch \
+	$dockerfile_pth \
+	--build-arg user_id=$UID
+
+docker run -d \
+	--gpus all \
+	--shm-size 8G \
+	-it \
+	--name tf_torch_gpu_all \
+	-v $mount_pth:/home/ktzevel/workspace \
+	tf_torch

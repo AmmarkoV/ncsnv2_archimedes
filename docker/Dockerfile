@@ -1,0 +1,37 @@
+FROM tensorflow/tensorflow:latest-gpu
+
+ARG user_id
+ARG root_psw="jsd%hsa@"
+ARG user_psw="ok"
+ARG user_name=ammarkov
+
+# Installs the necessary pkgs.
+RUN \
+	echo "**** packages installation ****" \
+		&& apt-key adv --fetch-keys http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/3bf863cc.pub \
+		&& apt-get update && apt-get install -y \
+			vim \
+			git \
+			virtualenv \
+			time \
+			sudo \
+			wget \
+			nano \
+	&& echo "**** python pip update ****" \
+		&& /usr/bin/python3 -m pip install --upgrade pip \
+	&& echo "**** aliases for l and ll commands creation ****" \
+		&& echo -e 'ls --color=auto "$@"' > /usr/bin/l \
+		&& echo -e 'ls -lah --color=auto "$@"' > /usr/bin/ll \
+    	&& chmod +x /usr/bin/ll /usr/bin/l \
+	&& echo "**** history-search-backward by pressing F8 ****" \
+		&& sed -i 's/# "\\e\[5~": history-search-backward/"\\e\[19~": history-search-backward/' /etc/inputrc \
+	&& echo "**** root password creation ****" \
+		&& echo "root:${root_psw}" | chpasswd \
+	&& echo "**** user creation ****" \
+		&& useradd -m -s /usr/bin/bash -u ${user_id} -G sudo ${user_name} \
+		&& echo "${user_name}:${user_psw}" | chpasswd \
+		&& chown -R ${user_name}:${user_name} /home/${user_name}/ \
+		&& mkdir /home/${user_name}/workspace/
+
+USER ${user_name} 
+WORKDIR /home/${user_name}/
