@@ -33,7 +33,7 @@ RUN \
 		&& echo "${user_name}:${user_psw}" | chpasswd \
 		&& chown -R ${user_name}:${user_name} /home/${user_name}/ \
 		&& mkdir /home/${user_name}/workspace/ \
-        && chown -R ammarkov:ammarkov workspace
+        && chown -R ammarkov:ammarkov /home/${user_name}/workspace
 
 
 USER ${user_name} 
