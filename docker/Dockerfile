@@ -32,12 +32,12 @@ RUN \
 		&& useradd -m -s /usr/bin/bash -u ${user_id} -G sudo ${user_name} \
 		&& echo "${user_name}:${user_psw}" | chpasswd \
 		&& chown -R ${user_name}:${user_name} /home/${user_name}/ \
-		&& mkdir /home/${user_name}/workspace/
+		&& mkdir /home/${user_name}/workspace/ \
+        && chown -R ammarkov:ammarkov workspace
 
 
 USER ${user_name} 
 WORKDIR /home/${user_name}/
-
-RUN sudo chown -R ammarkov:ammarkov workspace
-RUN cd workspace && git clone https://github.com/AmmarkoV/ncsnv2_archimedes/ && ./initialize.sh
+ 
+RUN cd /home/${user_name}/workspace && git clone https://github.com/AmmarkoV/ncsnv2_archimedes/ && ./initialize.sh
 
