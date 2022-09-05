@@ -1,8 +1,15 @@
 #!/usr/bin/env bash
 # This script builds and runs a docker image for local use.
 
-dockerfile_pth=/home/kostis/Desktop/MSC/komod/CODE/docker/local
-mount_pth=/home/kostis/Desktop/MSC/komod/CODE
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd "$DIR"
+cd ..
+REPOSITORY=`pwd`
+
+cd "$DIR"
+
+dockerfile_pth="$DIR"
+mount_pth="$REPOSITORY"
 
 # update tensorflow image
 docker pull tensorflow/tensorflow:latest-gpu
@@ -20,3 +27,8 @@ docker run -d \
 	--name tf_torch_gpu_all \
 	-v $mount_pth:/home/ktzevel/workspace \
 	tf_torch
+
+
+#To Connect : 
+#docker ps -a
+#docker attach ID 

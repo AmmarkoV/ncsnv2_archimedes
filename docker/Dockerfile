@@ -1,7 +1,7 @@
 FROM tensorflow/tensorflow:latest-gpu
 
 ARG user_id
-ARG root_psw="jsd%hsa@"
+ARG root_psw="12345678"
 ARG user_psw="ok"
 ARG user_name=ammarkov
 
@@ -17,6 +17,7 @@ RUN \
 			sudo \
 			wget \
 			nano \
+            python3.8-venv \
 	&& echo "**** python pip update ****" \
 		&& /usr/bin/python3 -m pip install --upgrade pip \
 	&& echo "**** aliases for l and ll commands creation ****" \
@@ -32,6 +33,10 @@ RUN \
 		&& echo "${user_name}:${user_psw}" | chpasswd \
 		&& chown -R ${user_name}:${user_name} /home/${user_name}/ \
 		&& mkdir /home/${user_name}/workspace/
+
+
+RUN sudo chown -R ammarkov:ammarkov /home/${user_name}//workplace
+RUN cd /home/${user_name}/workplace && git clone https://github.com/AmmarkoV/ncsnv2_archimedes/ && ./initialize.sh
 
 USER ${user_name} 
 WORKDIR /home/${user_name}/
