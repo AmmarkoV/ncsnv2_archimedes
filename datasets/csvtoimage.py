@@ -1,4 +1,5 @@
-import datasets.csvutils as csvutils 
+#import datasets.csvutils as csvutils 
+import csvutils
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -246,11 +247,14 @@ def splitDepthValueToChannels(depthValue,near=0,far=500):
    upper8bits = d16 >> 8
    lower8bits = d16 & 0b0000000011111111
    #-------------------------------------
-   r=0
-   g=upper8bits
-   b=lower8bits
+   r=int(0)
+   g=int(upper8bits)
+   b=int(lower8bits)
    #-------------------------------------
-   #print("Value %0.2f | R=%0.2f G=%0.2f B=%0.2f "%(depthValue,r,g,b))
+   #print("Value %0.2f | R=%u G=%u B=%u "%(depthValue,r,g,b))
+   #print("Upper {:08b}".format(upper8bits))
+   #print("Lower {:08b}".format(lower8bits))
+   #print("16bit {:016b}".format(d16))
    return r,g,b
 
 
@@ -380,6 +384,10 @@ if __name__ == "__main__":
     poses      = 100 
     resolution = 120#150
 
+    #for depthValue in range(50,450):
+    # splitDepthValueToChannels(depthValue)
+    #sys.exit(0)
+ 
     pose2d=csvutils.readCSVFile("exp/datasets/cmubvh/2d_body_all.csv",memPercentage=poses)
     pose3d=csvutils.readCSVFile("exp/datasets/cmubvh/3d_body_all.csv",memPercentage=poses)
 
@@ -389,7 +397,7 @@ if __name__ == "__main__":
       
       imgSwapped = np.swapaxes(img,0,2)
       imgSwapped = np.swapaxes(imgSwapped,0,1)
-      fig = plt.imshow(imgSwapped)
+      fig = plt.imshow(imgSwapped.astype(np.uint8))
       # fig.axes.get_xaxis().set_visible(False)
       # fig.axes.get_yaxis().set_visible(False)
       plt.savefig(f'debug/pose{p}.png')
