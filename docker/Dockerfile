@@ -39,5 +39,5 @@ RUN \
 USER ${user_name} 
 WORKDIR /home/${user_name}/
  
-RUN cd /home/${user_name}/workspace && git clone https://github.com/AmmarkoV/ncsnv2_archimedes/ && ./initialize.sh
+RUN cd /home/${user_name}/workspace && git clone https://github.com/AmmarkoV/ncsnv2_archimedes/ && cd ncsnv2_archimedes && ./initialize.sh
 
