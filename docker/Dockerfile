@@ -35,8 +35,9 @@ RUN \
 		&& mkdir /home/${user_name}/workspace/
 
 
-RUN sudo chown -R ammarkov:ammarkov /home/${user_name}//workplace
-RUN cd /home/${user_name}/workplace && git clone https://github.com/AmmarkoV/ncsnv2_archimedes/ && ./initialize.sh
-
 USER ${user_name} 
 WORKDIR /home/${user_name}/
+
+RUN sudo chown -R ammarkov:ammarkov workplace
+RUN cd workplace && git clone https://github.com/AmmarkoV/ncsnv2_archimedes/ && ./initialize.sh
+
