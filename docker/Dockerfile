@@ -3,7 +3,7 @@ FROM tensorflow/tensorflow:latest-gpu
 ARG user_id
 ARG root_psw="12345678"
 ARG user_psw="ok"
-ARG user_name=ammarkov
+ARG user_name=user
 
 # Installs the necessary pkgs.
 RUN \
@@ -33,7 +33,7 @@ RUN \
 		&& echo "${user_name}:${user_psw}" | chpasswd \
 		&& chown -R ${user_name}:${user_name} /home/${user_name}/ \
 		&& mkdir /home/${user_name}/workspace/ \
-        && chown -R ammarkov:ammarkov /home/${user_name}/workspace
+        && chown -R user:user /home/${user_name}/workspace
 
 
 USER ${user_name} 
