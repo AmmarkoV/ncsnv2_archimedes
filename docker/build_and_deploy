@@ -26,7 +26,7 @@ docker run -d \
 	--shm-size 8G \
 	-it \
 	--name $NAME-container \
-	-v $mount_pth:/home/ktzevel/workspace \
+	-v $mount_pth:/home/user/workspace \
 	$NAME
 
 
