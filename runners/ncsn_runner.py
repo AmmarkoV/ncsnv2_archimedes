@@ -25,7 +25,7 @@ __all__ = ['NCSNRunner']
 def get_model(config):
     if config.data.dataset == 'CIFAR10' or config.data.dataset == 'CELEBA' or config.data.dataset == 'CMUBVH':
         return NCSNv2(config).to(config.device)
-    elif config.data.dataset == "FFHQ":
+    elif config.data.dataset == "FFHQ" or config.data.dataset == 'CMUBVHHQ' :
         return NCSNv2Deepest(config).to(config.device)
     elif config.data.dataset == 'LSUN':
         return NCSNv2Deeper(config).to(config.device)
@@ -232,8 +232,7 @@ class NCSNRunner():
         sigmas = sigmas_th.cpu().numpy()
 
         dataset, _ = get_dataset(self.args, self.config)
-        dataloader = DataLoader(dataset, batch_size=self.config.sampling.batch_size, shuffle=True,
-                                num_workers=4)
+        dataloader = DataLoader(dataset, batch_size=self.config.sampling.batch_size, shuffle=True,num_workers=4)
 
         score.eval()
 
@@ -338,6 +337,7 @@ class NCSNRunner():
                     init_samples = samples + sigmas_th[0] * torch.randn_like(samples)
 
                 else:
+                    #TO AMMAR: EDW PREPEI NA MPEI TO SAMPLE MAS! 
                     init_samples = torch.rand(self.config.sampling.batch_size, self.config.data.channels,
                                               self.config.data.image_size, self.config.data.image_size,
                                               device=self.config.device)
