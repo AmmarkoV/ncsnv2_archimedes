@@ -31,7 +31,7 @@ def get_dataset(args, config):
         dataset = CIFAR10(os.path.join(args.exp, 'datasets', 'cifar10'), train=True, download=True,transform=tran_transform)
         test_dataset = CIFAR10(os.path.join(args.exp, 'datasets', 'cifar10_test'), train=False, download=True,transform=test_transform)
     
-    elif config.data.dataset == 'CMUBVH':
+    elif (config.data.dataset == 'CMUBVH') or (config.data.dataset == 'CMUBVHHQ'):
 #        dataset = CMUBVH(os.path.join(args.exp, 'datasets', 'cmubvh'), train=True, res=config.data.image_size)
 #        test_dataset = CMUBVH(os.path.join(args.exp, 'datasets', 'cmubvh_test'), train=False, res=config.data.image_size)
         dataset = CMUBVH(train=True, res=config.data.image_size)

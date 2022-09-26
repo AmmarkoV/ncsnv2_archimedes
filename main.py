@@ -182,7 +182,7 @@ def main():
         if args.test:
             runner.test()
         elif args.sample:
-            runner.sample() #AMMAR : sample
+            runner.sample3D() #AMMAR : sample
         elif args.fast_fid:
             runner.fast_fid()
         else:
