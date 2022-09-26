@@ -8,33 +8,33 @@ import matplotlib.pyplot as plt
 def getParentList():
  pl=dict()
  #---------------------------------------------------
- pl["hip"]="hip"               #0  
- pl["neck"]="hip"              #1  
- pl["head"]="neck"             #2
- pl["abdomen"]="chest"         #3
- pl["chest"]="hip"             #4
- pl["eye.l"]="head"    #5    
- pl["eye.r"]="head"    #6   
- pl["EndSite_eye.l"]="eye.l"    #5    
- pl["EndSite_eye.r"]="eye.r"    #6   
- pl["rshoulder"]="neck"        #7    
- pl["relbow"]="rshoulder"      #8      
- pl["rhand"]="relbow"          #9
- pl["lshoulder"]="neck"        #10
- pl["lelbow"]="lshoulder"      #11
- pl["lhand"]="lelbow"          #12
- pl["rhip"]="hip"              #13
- pl["rknee"]="rhip"            #14
- pl["rfoot"]="rknee"           #15
- pl["toe1-2.r"]="rfoot"#16
- pl["toe5-3.r"]="rfoot"#17
+ pl["hip"]="hip"                  #0  
+ pl["neck"]="hip"                 #1  
+ pl["head"]="neck"                #2
+ pl["abdomen"]="chest"            #3
+ pl["chest"]="hip"                #4
+ pl["eye.l"]="head"               #5    
+ pl["eye.r"]="head"               #6   
+ pl["EndSite_eye.l"]="eye.l"      #5    
+ pl["EndSite_eye.r"]="eye.r"      #6   
+ pl["rshoulder"]="neck"           #7    
+ pl["relbow"]="rshoulder"         #8      
+ pl["rhand"]="relbow"             #9
+ pl["lshoulder"]="neck"           #10
+ pl["lelbow"]="lshoulder"         #11
+ pl["lhand"]="lelbow"             #12
+ pl["rhip"]="hip"                 #13
+ pl["rknee"]="rhip"               #14
+ pl["rfoot"]="rknee"              #15
+ pl["toe1-2.r"]="rfoot"           #16
+ pl["toe5-3.r"]="rfoot"           #17
  pl["EndSite_toe1-2.r"]="toe1-2.r"#16
  pl["EndSite_toe5-3.r"]="toe5-3.r"#17
- pl["lhip"]="hip"              #18
- pl["lknee"]="lhip"            #19
- pl["lfoot"]="lknee"           #20
- pl["toe1-2.l"]="lfoot"#21
- pl["toe5-3.l"]="lfoot"#22
+ pl["lhip"]="hip"                 #18
+ pl["lknee"]="lhip"               #19
+ pl["lfoot"]="lknee"              #20
+ pl["toe1-2.l"]="lfoot"           #21
+ pl["toe5-3.l"]="lfoot"           #22
  pl["EndSite_toe1-2.l"]="toe1-2.l"#21
  pl["EndSite_toe5-3.l"]="toe5-3.l"#22
  return pl
@@ -110,6 +110,44 @@ def weighted_line(r0, c0, r1, c1, w, rmin=0, rmax=np.inf):
     mask = np.logical_and.reduce((yy >= rmin, yy < rmax, vals > 0))
 
     return (yy[mask].astype(int), xx[mask].astype(int), vals[mask])
+
+
+def getJoint2DCoordinates(
+                        joint2DLabelList,
+                        joint2DBodyList,
+                        #----------------
+                        label,
+                        #----------------
+                        width,
+                        height,
+                        #----------------
+                        sampleID
+                       ):
+       xLabel = "2DX_"+label
+       yLabel = "2DY_"+label
+       if (xLabel in joint2DLabelList) and ( yLabel in joint2DLabelList):
+
+         idxX = joint2DLabelList.index(xLabel)
+         idxY = joint2DLabelList.index(yLabel)
+        
+         if (len(joint2DBodyList.shape)==1):
+          x2D  = int(min(width-1 ,width*joint2DBodyList[idxX]))
+          y2D  = int(min(height-1,height*joint2DBodyList[idxY]))
+         else:
+          x2D  = int(min(width-1 ,width*joint2DBodyList[sampleID][idxX]))
+          y2D  = int(min(height-1,height*joint2DBodyList[sampleID][idxY]))
+        
+         #print("getJointCoordinates ",xLabel,",",yLabel," => ", x2D, y2D, z3D)
+         #valueToColor = min(255,int(z3D * 255 / (-400)))
+         #print("  val ", valueToColor)
+
+         return x2D,y2D
+       #print("getJointCoordinates could not find ",xLabel,",",yLabel," ")
+       return 0,0
+
+
+
+
 
 def getJointCoordinates(
                         joint2DLabelList,
@@ -378,6 +416,40 @@ def csvToImage(data3D,data2D,sampleID, width=32, height=32, rnd=False, translati
         #img[1][yP2D][xP2D] = Pval 
 
     return img
+
+
+
+def imageToCSV(data2D, image, sampleID, width=32, height=32, rnd=False, translationInvariant=True, interpolateDepth=True, bkg=0.5, encoding=False):
+    labels = list()
+    #Gather all labels from our 3D data
+    for label in data2D["label"]:
+      tokens = label.split('_')
+      if (len(tokens)==2):
+       labels.append(tokens[1])
+      if (len(tokens)==3):
+       labels.append(tokens[1]+'_'+tokens[2])
+    labels = list(set(labels))
+    print("Labels ",labels)
+
+
+    x2D,y2D = getJoint2DCoordinates(
+                                    data2D["label"],
+                                    data2D["body"],
+                                    #----------------
+                                    label,
+                                    #----------------
+                                    width,
+                                    height,
+                                    #----------------
+                                    sampleID
+                                   )
+    data3D = dict()
+
+
+
+
+
+
 
 
 if __name__ == "__main__":
