@@ -27,6 +27,7 @@ def parse_args_and_config():
     parser.add_argument('--verbose', type=str, default='info', help='Verbose level: info | debug | warning | critical')
     parser.add_argument('--test', action='store_true', help='Whether to test the model')
     parser.add_argument('--sample', action='store_true', help='Whether to produce samples from the model')
+    parser.add_argument('--sample3d', action='store_true', help='Whether to produce samples3d from the model')
     parser.add_argument('--fast_fid', action='store_true', help='Whether to do fast fid test')
     parser.add_argument('--resume_training', action='store_true', help='Whether to resume training')
     parser.add_argument('-i', '--image_folder', type=str, default='images', help="The folder name of samples")
@@ -42,7 +43,7 @@ def parse_args_and_config():
 
     tb_path = os.path.join(args.exp, 'tensorboard', args.doc)
 
-    if not args.test and not args.sample and not args.fast_fid:
+    if not args.test and not args.sample and not args.sample3d and not args.fast_fid:
         if not args.resume_training:
             if os.path.exists(args.log_path):
                 overwrite = False
@@ -96,7 +97,7 @@ def parse_args_and_config():
         logger.addHandler(handler1)
         logger.setLevel(level)
 
-        if args.sample:
+        if args.sample or args.sample3d:
             os.makedirs(os.path.join(args.exp, 'image_samples'), exist_ok=True)
             args.image_folder = os.path.join(args.exp, 'image_samples', args.image_folder)
             if not os.path.exists(args.image_folder):
@@ -172,7 +173,7 @@ def main():
     logging.info("Config =")
     print(">" * 80)
     config_dict = copy.copy(vars(config))
-    if not args.test and not args.sample and not args.fast_fid:
+    if not args.test and not args.sample and not args.sample3d and not args.fast_fid:
         del config_dict['tb_logger']
     print(yaml.dump(config_dict, default_flow_style=False))
     print("<" * 80)
@@ -182,7 +183,9 @@ def main():
         if args.test:
             runner.test()
         elif args.sample:
-            runner.sample3D() #AMMAR : sample
+            runner.sample()
+        elif args.sample3d:
+            runner.sample3D()
         elif args.fast_fid:
             runner.fast_fid()
         else:

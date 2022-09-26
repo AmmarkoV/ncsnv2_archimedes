@@ -411,9 +411,6 @@ class NCSNRunner():
                     save_image(img, os.path.join(self.args.image_folder, 'image_{}.png'.format(img_id)))
                     img_id += 1
 
-
-
-
     def sample3D(self):
         if self.config.sampling.ckpt_id is None:
             states = torch.load(os.path.join(self.args.log_path, 'checkpoint.pth'), map_location=self.config.device)
@@ -440,184 +437,39 @@ class NCSNRunner():
 
         score.eval()
 
+        #TO AMMAR: EDW PREPEI NA MPEI TO SAMPLE MAS! 
         if not self.config.sampling.fid:
-            if self.config.sampling.inpainting:
-                data_iter = iter(dataloader)
-                refer_images, _ = next(data_iter)
-                refer_images = refer_images.to(self.config.device)
-                width = int(np.sqrt(self.config.sampling.batch_size))
-                init_samples = torch.rand(width, width, self.config.data.channels,
-                                          self.config.data.image_size,
-                                          self.config.data.image_size,
-                                          device=self.config.device)
-                init_samples = data_transform(self.config, init_samples)
-                all_samples = anneal_Langevin_dynamics_inpainting(init_samples, refer_images[:width, ...], score,
-                                                                  sigmas,
-                                                                  self.config.data.image_size,
-                                                                  self.config.sampling.n_steps_each,
-                                                                  self.config.sampling.step_lr)
+            init_samples = torch.rand(self.config.sampling.batch_size,
+                                      self.config.data.channels,
+                                      self.config.data.image_size,
+                                      self.config.data.image_size,
+                                      device=self.config.device)
 
-                torch.save(refer_images[:width, ...], os.path.join(self.args.image_folder, 'refer_image.pth'))
-                refer_images = refer_images[:width, None, ...].expand(-1, width, -1, -1, -1).reshape(-1,
-                                                                                                     *refer_images.shape[
-                                                                                                      1:])
-                save_image(refer_images, os.path.join(self.args.image_folder, 'refer_image.png'), nrow=width)
+            init_samples = data_transform(self.config, init_samples)
 
-                if not self.config.sampling.final_only:
-                    for i, sample in enumerate(tqdm.tqdm(all_samples)):
-                        sample = sample.view(self.config.sampling.batch_size, self.config.data.channels,
-                                             self.config.data.image_size,
-                                             self.config.data.image_size)
+            all_samples = anneal_Langevin_dynamics(init_samples,
+                                                   score,
+                                                   sigmas,
+                                                   self.config.sampling.n_steps_each,
+                                                   self.config.sampling.step_lr,
+                                                   verbose=True,
+                                                   final_only=self.config.sampling.final_only,
+                                                   denoise=self.config.sampling.denoise)
 
-                        sample = inverse_data_transform(self.config, sample)
-
-                        image_grid = make_grid(sample, int(np.sqrt(self.config.sampling.batch_size)))
-                        save_image(image_grid, os.path.join(self.args.image_folder, 'image_grid_{}.png'.format(i)))
-                        torch.save(sample, os.path.join(self.args.image_folder, 'completion_{}.pth'.format(i)))
-                else:
-                    sample = all_samples[-1].view(self.config.sampling.batch_size, self.config.data.channels,
-                                                  self.config.data.image_size,
-                                                  self.config.data.image_size)
-
+            if not self.config.sampling.final_only:
+                for i, sample in tqdm.tqdm(enumerate(all_samples), total=len(all_samples), desc="saving image samples"):
+                    sample = sample.view(sample.shape[0], self.config.data.channels, self.config.data.image_size, self.config.data.image_size)
                     sample = inverse_data_transform(self.config, sample)
 
                     image_grid = make_grid(sample, int(np.sqrt(self.config.sampling.batch_size)))
-                    save_image(image_grid, os.path.join(self.args.image_folder,
-                                                        'image_grid_{}.png'.format(self.config.sampling.ckpt_id)))
-                    torch.save(sample, os.path.join(self.args.image_folder,
-                                                    'completion_{}.pth'.format(self.config.sampling.ckpt_id)))
-
-            elif self.config.sampling.interpolation:
-                if self.config.sampling.data_init:
-                    data_iter = iter(dataloader)
-                    samples, _ = next(data_iter)
-                    samples = samples.to(self.config.device)
-                    samples = data_transform(self.config, samples)
-                    init_samples = samples + sigmas_th[0] * torch.randn_like(samples)
-
-                else:
-                    init_samples = torch.rand(self.config.sampling.batch_size, self.config.data.channels,
-                                              self.config.data.image_size, self.config.data.image_size,
-                                              device=self.config.device)
-                    init_samples = data_transform(self.config, init_samples)
-
-                all_samples = anneal_Langevin_dynamics_interpolation(init_samples, score, sigmas,
-                                                                     self.config.sampling.n_interpolations,
-                                                                     self.config.sampling.n_steps_each,
-                                                                     self.config.sampling.step_lr, verbose=True,
-                                                                     final_only=self.config.sampling.final_only)
-
-                if not self.config.sampling.final_only:
-                    for i, sample in tqdm.tqdm(enumerate(all_samples), total=len(all_samples),
-                                               desc="saving image samples"):
-                        sample = sample.view(sample.shape[0], self.config.data.channels,
-                                             self.config.data.image_size,
-                                             self.config.data.image_size)
-
-                        sample = inverse_data_transform(self.config, sample)
-
-                        image_grid = make_grid(sample, nrow=self.config.sampling.n_interpolations)
-                        save_image(image_grid, os.path.join(self.args.image_folder, 'image_grid_{}.png'.format(i)))
-                        torch.save(sample, os.path.join(self.args.image_folder, 'samples_{}.pth'.format(i)))
-                else:
-                    sample = all_samples[-1].view(all_samples[-1].shape[0], self.config.data.channels,
-                                                  self.config.data.image_size,
-                                                  self.config.data.image_size)
-
-                    sample = inverse_data_transform(self.config, sample)
-
-                    image_grid = make_grid(sample, self.config.sampling.n_interpolations)
-                    save_image(image_grid, os.path.join(self.args.image_folder,
-                                                        'image_grid_{}.png'.format(self.config.sampling.ckpt_id)))
-                    torch.save(sample, os.path.join(self.args.image_folder,
-                                                    'samples_{}.pth'.format(self.config.sampling.ckpt_id)))
-
+                    save_image(image_grid, os.path.join(self.args.image_folder, 'image_grid_{}.png'.format(i)))
+                    torch.save(sample, os.path.join(self.args.image_folder, 'samples_{}.pth'.format(i)))
             else:
-                if self.config.sampling.data_init:
-                    data_iter = iter(dataloader)
-                    samples, _ = next(data_iter)
-                    samples = samples.to(self.config.device)
-                    samples = data_transform(self.config, samples)
-                    init_samples = samples + sigmas_th[0] * torch.randn_like(samples)
-
-                else:
-                    #TO AMMAR: EDW PREPEI NA MPEI TO SAMPLE MAS! 
-                    init_samples = torch.rand(self.config.sampling.batch_size, self.config.data.channels,
-                                              self.config.data.image_size, self.config.data.image_size,
-                                              device=self.config.device)
-                    init_samples = data_transform(self.config, init_samples)
-
-                all_samples = anneal_Langevin_dynamics(init_samples, score, sigmas,
-                                                       self.config.sampling.n_steps_each,
-                                                       self.config.sampling.step_lr, verbose=True,
-                                                       final_only=self.config.sampling.final_only,
-                                                       denoise=self.config.sampling.denoise)
-
-                if not self.config.sampling.final_only:
-                    for i, sample in tqdm.tqdm(enumerate(all_samples), total=len(all_samples),
-                                               desc="saving image samples"):
-                        sample = sample.view(sample.shape[0], self.config.data.channels,
-                                             self.config.data.image_size,
-                                             self.config.data.image_size)
-
-                        sample = inverse_data_transform(self.config, sample)
-
-                        image_grid = make_grid(sample, int(np.sqrt(self.config.sampling.batch_size)))
-                        save_image(image_grid, os.path.join(self.args.image_folder, 'image_grid_{}.png'.format(i)))
-                        torch.save(sample, os.path.join(self.args.image_folder, 'samples_{}.pth'.format(i)))
-                else:
-                    sample = all_samples[-1].view(all_samples[-1].shape[0], self.config.data.channels,
-                                                  self.config.data.image_size,
-                                                  self.config.data.image_size)
-
-                    sample = inverse_data_transform(self.config, sample)
-
-                    image_grid = make_grid(sample, int(np.sqrt(self.config.sampling.batch_size)))
-                    save_image(image_grid, os.path.join(self.args.image_folder,
-                                                        'image_grid_{}.png'.format(self.config.sampling.ckpt_id)))
-                    torch.save(sample, os.path.join(self.args.image_folder,
-                                                    'samples_{}.pth'.format(self.config.sampling.ckpt_id)))
-
-        else:
-            total_n_samples = self.config.sampling.num_samples4fid
-            n_rounds = total_n_samples // self.config.sampling.batch_size
-            if self.config.sampling.data_init:
-                dataloader = DataLoader(dataset, batch_size=self.config.sampling.batch_size, shuffle=True,
-                                        num_workers=4)
-                data_iter = iter(dataloader)
-
-            img_id = 0
-            for _ in tqdm.tqdm(range(n_rounds), desc='Generating image samples for FID/inception score evaluation'):
-                if self.config.sampling.data_init:
-                    try:
-                        samples, _ = next(data_iter)
-                    except StopIteration:
-                        data_iter = iter(dataloader)
-                        samples, _ = next(data_iter)
-                    samples = samples.to(self.config.device)
-                    samples = data_transform(self.config, samples)
-                    samples = samples + sigmas_th[0] * torch.randn_like(samples)
-                else:
-                    samples = torch.rand(self.config.sampling.batch_size, self.config.data.channels,
-                                         self.config.data.image_size,
-                                         self.config.data.image_size, device=self.config.device)
-                    samples = data_transform(self.config, samples)
-
-                all_samples = anneal_Langevin_dynamics(samples, score, sigmas,
-                                                       self.config.sampling.n_steps_each,
-                                                       self.config.sampling.step_lr, verbose=False,
-                                                       denoise=self.config.sampling.denoise)
-
-                samples = all_samples[-1]
-                for img in samples:
-                    img = inverse_data_transform(self.config, img)
-
-                    save_image(img, os.path.join(self.args.image_folder, 'image_{}.png'.format(img_id)))
-                    img_id += 1
-
-
-
-
+                sample = all_samples[-1].view(all_samples[-1].shape[0], self.config.data.channels, self.config.data.image_size, self.config.data.image_size)
+                sample = inverse_data_transform(self.config, sample)
+                image_grid = make_grid(sample, int(np.sqrt(self.config.sampling.batch_size)))
+                save_image(image_grid, os.path.join(self.args.image_folder, 'image_grid_{}.png'.format(self.config.sampling.ckpt_id)))
+                torch.save(sample, os.path.join(self.args.image_folder, 'samples_{}.pth'.format(self.config.sampling.ckpt_id)))
 
     def test(self):
         score = get_model(self.config)

@@ -37,7 +37,7 @@ test:
   batch_size: 100
 
 data:
-  dataset: "CMUBVHHQ"
+  dataset: "CMUBVH"
   image_size: 64
   channels: 3
   logit_transform: false
