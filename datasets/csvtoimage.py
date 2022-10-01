@@ -4,7 +4,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-
 def getParentList():
  pl=dict()
  #---------------------------------------------------
@@ -230,13 +229,10 @@ def getJoint3DCoordinatesNormalize(
 #---------------------------------------------------
 #---------------------------------------------------
 
-
-
-
 """
   Convert a Depth Value to RGB 
 """
-def splitDepthValueToChannels(depthValue,near=0,far=500):
+def convertDepthValueToRGB(depthValue,near=0,far=500):
    #https://sites.google.com/site/brainrobotdata/home/depth-image-encoding
    #https://developers.google.com/depthmap-metadata/encoding
    
@@ -259,7 +255,21 @@ def splitDepthValueToChannels(depthValue,near=0,far=500):
    #print("16bit {:016b}".format(d16))
    return r,g,b
 
+"""
+  Convert an RGB encoded value back to the Depth Value 
+"""
+def convertRGBValueToDepth(r,g,b,near=0,far=500):
+   #Make sure value is positive
+   # r 
+   upper8bits=int(g)
+   lower8bits=int(b)
 
+   depthValue = (upper8bits << 8) | lower8bits;
+   
+   depthValue = depthValue / 65536
+   depthValue = near + ( depthValue * (far - near) ) 
+
+   return depthValue
 
 """
   Euclidean 2D Distance
@@ -284,11 +294,9 @@ def interpolateValue(sX,sY,sV,tX,tY,tV,currentX,currentY):
    value = value + tV * (distanceToTarget/distanceFull)
    return value
 
-
 #---------------------------------------------------
 #---------------------------------------------------
 #---------------------------------------------------
-
 def csvToImageDigitalEncoding(data3D,data2D,sampleID, width=32, height=32):
     #First failed experiment with zeros!
     #img = np.zeros((3,width,height))
@@ -334,8 +342,6 @@ def csvToImageDigitalEncoding(data3D,data2D,sampleID, width=32, height=32):
        #print("Label ",label," x=",x2D," y=",y2D," v=",val," => xS=",xS," yS=",yS," encX=",encX," => encY=",encY," encV=",encV)
    
     return img
-
-
 
 """
   Convert CSV 2D + 3D Data to an RGB Image!
@@ -385,7 +391,7 @@ def csvToImage(data3D,data2D,sampleID, width=32, height=32, rnd=False, translati
 
     for label in labels:
        x2D,y2D,val        = getJoint3DCoordinates(data2D["label"],data2D["body"],data3D["label"],data3D["body"],label,width,height,sampleID)
-       r,g,b = splitDepthValueToChannels(val)
+       r,g,b = convertDepthValueToRGB(val)
 
        xP2D,yP2D,Pval     = getJoint3DCoordinates(data2D["label"],data2D["body"],data3D["label"],data3D["body"],parentList[label],width,height,sampleID)
  
@@ -421,7 +427,7 @@ def csvToImage(data3D,data2D,sampleID, width=32, height=32, rnd=False, translati
          for i in range(0,len(y)):
            if (interpolateDepth):
              interpolatedValue = interpolateValue(x2D,y2D,val,xP2D,yP2D,Pval,x[i],y[i])
-             iR,iG,iB = splitDepthValueToChannels(interpolatedValue)
+             iR,iG,iB = convertDepthValueToRGB(interpolatedValue)
            img[0][y[i]][x[i]] = iR
            img[1][y[i]][x[i]] = iG
            img[2][y[i]][x[i]] = iB
@@ -465,24 +471,24 @@ def imageToCSV(data2D, image, sampleID, width=32, height=32, rnd=False, translat
                                    )
     data3D = dict()
 
-
-
-
 #---------------------------------------------------
 #---------------------------------------------------
 #---------------------------------------------------
-
-
-
 
 if __name__ == "__main__":
     poses      = 100 
-    resolution = 120#150
-
-    #for depthValue in range(50,450):
-    # splitDepthValueToChannels(depthValue)
+    resolution = 64#150
+  
+    import sys
+    for depthValue in range(50,450):
+       r,g,b = convertDepthValueToRGB(depthValue)
+       depthValue2 = int(round(convertRGBValueToDepth(r,g,b)))
+       if (depthValue2!=depthValue):
+          print("Mismatch at Depth ",depthValue," -> R ",r," G ",g," B ",b," -> ",depthValue2)
+          sys.exit(0)
+    print("All Depth->RGB->Depth conversions are happening successfuly")
     #sys.exit(0)
- 
+  
     pose2d=csvutils.readCSVFile("exp/datasets/cmubvh/2d_body_all.csv",memPercentage=poses)
     pose3d=csvutils.readCSVFile("exp/datasets/cmubvh/3d_body_all.csv",memPercentage=poses)
 
