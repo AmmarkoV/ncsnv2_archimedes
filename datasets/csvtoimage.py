@@ -39,10 +39,13 @@ def getParentList():
  pl["EndSite_toe5-3.l"]="toe5-3.l"#22
  return pl
 #---------------------------------------------------
-
 parentList = getParentList()
+#---------------------------------------------------
 
 
+#---------------------------------------------------
+#---------------------------------------------------
+#---------------------------------------------------
 def draw_line(r0, c0, r1, c1):
     #print("draw_line(",r0,c0,r1,c1,")")
     if (r0==r1) and (c0==c1):
@@ -111,6 +114,10 @@ def weighted_line(r0, c0, r1, c1, w, rmin=0, rmax=np.inf):
 
     return (yy[mask].astype(int), xx[mask].astype(int), vals[mask])
 
+#---------------------------------------------------
+#---------------------------------------------------
+#---------------------------------------------------
+
 
 def getJoint2DCoordinates(
                         joint2DLabelList,
@@ -137,19 +144,16 @@ def getJoint2DCoordinates(
           x2D  = int(min(width-1 ,width*joint2DBodyList[sampleID][idxX]))
           y2D  = int(min(height-1,height*joint2DBodyList[sampleID][idxY]))
         
-         #print("getJointCoordinates ",xLabel,",",yLabel," => ", x2D, y2D, z3D)
+         #print("getJoint2DCoordinates ",xLabel,",",yLabel," => ", x2D, y2D, z3D)
          #valueToColor = min(255,int(z3D * 255 / (-400)))
          #print("  val ", valueToColor)
 
          return x2D,y2D
-       #print("getJointCoordinates could not find ",xLabel,",",yLabel," ")
+       #print("getJoint2DCoordinates could not find ",xLabel,",",yLabel," ")
        return 0,0
 
 
-
-
-
-def getJointCoordinates(
+def getJoint3DCoordinates(
                         joint2DLabelList,
                         joint2DBodyList,
                         #----------------
@@ -181,17 +185,17 @@ def getJointCoordinates(
           y2D  = int(min(height-1,height*joint2DBodyList[sampleID][idxY]))
           z3D  = int(joint3DBodyList[sampleID][idxZ])
         
-         #print("getJointCoordinates ",xLabel,",",yLabel," => ", x2D, y2D, z3D)
+         #print("getJoint3DCoordinates ",xLabel,",",yLabel," => ", x2D, y2D, z3D)
          valueToColor = min(255,int(z3D * 255 / (-400)))
          #print("  val ", valueToColor)
 
          return x2D,y2D,valueToColor
-       #print("getJointCoordinates could not find ",xLabel,",",yLabel," ")
+       #print("getJoint3DCoordinates could not find ",xLabel,",",yLabel," ")
        return 0,0,0
 
 
 
-def getJointCoordinatesNormalize(
+def getJoint3DCoordinatesNormalize(
                         joint2DLabelList,
                         joint2DBodyList,
                         #----------------
@@ -205,7 +209,7 @@ def getJointCoordinatesNormalize(
                         #----------------
                         sampleID
                        ):
-  x2D,y2D,val = getJointCoordinates(
+  x2D,y2D,val = getJoint3DCoordinates(
                                     joint2DLabelList,
                                     joint2DBodyList,
                                     #----------------
@@ -222,56 +226,16 @@ def getJointCoordinatesNormalize(
   return float(x2D/width),float(y2D/height),float(val/255)
 
 
-
-def csvToImageEncoding(data3D,data2D,sampleID, width=32, height=32):
-    #First failed experiment with zeros!
-    #img = np.zeros((3,width,height))
-    #Second experiment will use 0.5 as background
-    bkg  = np.random.rand()
-    img = np.full((3,width,height),bkg)
-
-    labels = list()
-    #Gather all labels from our 3D data
-    for label in data3D["label"]:
-      tokens = label.split('_')
-      if (len(tokens)==2):
-       labels.append(tokens[1])
-      if (len(tokens)==3):
-       labels.append(tokens[1]+'_'+tokens[2])
-    labels = list(set(labels))
-    #print("Labels ",labels)
- 
-    if (len(labels)==0):
-      print("Sample ",sampleID," is empty")
-      return img
-
-    widthPerJoint  = int(width/3)
-    heightPerJoint = int(max(1,height/len(labels)))
-    #print(widthPerJoint,"/",heightPerJoint)
-   
-    yS = 0
-    for label in labels:
-       xS = 0
-       x2D,y2D,val = getJointCoordinatesNormalize(data2D["label"],data2D["body"],data3D["label"],data3D["body"],label,width,height,sampleID)
-       #---------------------------------------------------
-       encX = float(min(255,x2D*255))
-       img[:,xS:xS+widthPerJoint,yS:yS+heightPerJoint]=encX
-       xS = xS + widthPerJoint
-       
-       encY = float(min(255,y2D*255))
-       img[:,xS:xS+widthPerJoint,yS:yS+heightPerJoint]=encY
-       xS = xS + widthPerJoint
-
-       encV = float(min(255,val*255))
-       img[:,xS:xS+widthPerJoint,yS:yS+heightPerJoint]=encV
-       yS = yS + heightPerJoint
-       #print("Label ",label," x=",x2D," y=",y2D," v=",val," => xS=",xS," yS=",yS," encX=",encX," => encY=",encY," encV=",encV)
-   
-    return img
+#---------------------------------------------------
+#---------------------------------------------------
+#---------------------------------------------------
 
 
 
 
+"""
+  Convert a Depth Value to RGB 
+"""
 def splitDepthValueToChannels(depthValue,near=0,far=500):
    #https://sites.google.com/site/brainrobotdata/home/depth-image-encoding
    #https://developers.google.com/depthmap-metadata/encoding
@@ -321,9 +285,64 @@ def interpolateValue(sX,sY,sV,tX,tY,tV,currentX,currentY):
    return value
 
 
+#---------------------------------------------------
+#---------------------------------------------------
+#---------------------------------------------------
+
+def csvToImageDigitalEncoding(data3D,data2D,sampleID, width=32, height=32):
+    #First failed experiment with zeros!
+    #img = np.zeros((3,width,height))
+    #Second experiment will use 0.5 as background
+    bkg  = np.random.rand()
+    img = np.full((3,width,height),bkg)
+
+    labels = list()
+    #Gather all labels from our 3D data
+    for label in data3D["label"]:
+      tokens = label.split('_')
+      if (len(tokens)==2):
+       labels.append(tokens[1])
+      if (len(tokens)==3):
+       labels.append(tokens[1]+'_'+tokens[2])
+    labels = list(set(labels))
+    #print("Labels ",labels)
+ 
+    if (len(labels)==0):
+      print("Sample ",sampleID," is empty")
+      return img
+
+    widthPerJoint  = int(width/3)
+    heightPerJoint = int(max(1,height/len(labels)))
+    #print(widthPerJoint,"/",heightPerJoint)
+   
+    yS = 0
+    for label in labels:
+       xS = 0
+       x2D,y2D,val = getJoint3DCoordinatesNormalize(data2D["label"],data2D["body"],data3D["label"],data3D["body"],label,width,height,sampleID)
+       #---------------------------------------------------
+       encX = float(min(255,x2D*255))
+       img[:,xS:xS+widthPerJoint,yS:yS+heightPerJoint]=encX
+       xS = xS + widthPerJoint
+       
+       encY = float(min(255,y2D*255))
+       img[:,xS:xS+widthPerJoint,yS:yS+heightPerJoint]=encY
+       xS = xS + widthPerJoint
+
+       encV = float(min(255,val*255))
+       img[:,xS:xS+widthPerJoint,yS:yS+heightPerJoint]=encV
+       yS = yS + heightPerJoint
+       #print("Label ",label," x=",x2D," y=",y2D," v=",val," => xS=",xS," yS=",yS," encX=",encX," => encY=",encY," encV=",encV)
+   
+    return img
+
+
+
+"""
+  Convert CSV 2D + 3D Data to an RGB Image!
+"""
 def csvToImage(data3D,data2D,sampleID, width=32, height=32, rnd=False, translationInvariant=True, interpolateDepth=True, bkg=0.5, encoding=False):
     if (encoding):
-        return csvToImageEncoding(data3D,data2D,sampleID,width=width,height=height)
+        return csvToImageDigitalEncoding(data3D,data2D,sampleID,width=width,height=height)
 
     #First failed experiment with zeros!
     #img = np.zeros((3,width,height))
@@ -359,16 +378,16 @@ def csvToImage(data3D,data2D,sampleID, width=32, height=32, rnd=False, translati
     alignX2D = 0
     alignY2D = 0
     if (translationInvariant):
-       x2D,y2D,val = getJointCoordinates(data2D["label"],data2D["body"],data3D["label"],data3D["body"],"hip",width,height,sampleID)
+       x2D,y2D,val = getJoint3DCoordinates(data2D["label"],data2D["body"],data3D["label"],data3D["body"],"hip",width,height,sampleID)
        alignX2D = (width/2)  - x2D
        alignY2D = (height/2) - y2D 
-     
+
 
     for label in labels:
-       x2D,y2D,val        = getJointCoordinates(data2D["label"],data2D["body"],data3D["label"],data3D["body"],label,width,height,sampleID)
+       x2D,y2D,val        = getJoint3DCoordinates(data2D["label"],data2D["body"],data3D["label"],data3D["body"],label,width,height,sampleID)
        r,g,b = splitDepthValueToChannels(val)
 
-       xP2D,yP2D,Pval     = getJointCoordinates(data2D["label"],data2D["body"],data3D["label"],data3D["body"],parentList[label],width,height,sampleID)
+       xP2D,yP2D,Pval     = getJoint3DCoordinates(data2D["label"],data2D["body"],data3D["label"],data3D["body"],parentList[label],width,height,sampleID)
  
        #Do alignment
        if (x2D!=0) and (y2D!=0) and (xP2D!=0) and (yP2D!=0):
@@ -417,8 +436,9 @@ def csvToImage(data3D,data2D,sampleID, width=32, height=32, rnd=False, translati
 
     return img
 
-
-
+"""
+  Convert CSV 2D Data + Image to 3D Data!
+""" 
 def imageToCSV(data2D, image, sampleID, width=32, height=32, rnd=False, translationInvariant=True, interpolateDepth=True, bkg=0.5, encoding=False):
     labels = list()
     #Gather all labels from our 3D data
@@ -448,6 +468,9 @@ def imageToCSV(data2D, image, sampleID, width=32, height=32, rnd=False, translat
 
 
 
+#---------------------------------------------------
+#---------------------------------------------------
+#---------------------------------------------------
 
 
 
