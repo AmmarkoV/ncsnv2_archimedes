@@ -115,7 +115,6 @@ def weighted_line(r0, c0, r1, c1, w, rmin=0, rmax=np.inf):
 #---------------------------------------------------
 #---------------------------------------------------
 #---------------------------------------------------
-
 def getJoint2DCoordinates(
                         joint2DLabelList,
                         joint2DBodyList,
@@ -218,7 +217,6 @@ def getJoint3DCoordinatesNormalize(
                                     sampleID
                                    )
   return float(x2D/width),float(y2D/height),float(val/255)
-
 #---------------------------------------------------
 #---------------------------------------------------
 #---------------------------------------------------
@@ -450,13 +448,13 @@ def imageToCSV(data2D, img, sampleID, width=32, height=32, rnd=False, translatio
        labels.append(tokens[1]+'_'+tokens[2])
     labels = list(set(labels))
     #print("Labels ",labels)
-      #------------------------------------------------
+    #------------------------------------------------
     data3D          = dict() # <- This will get populated 
     data3D["label"] = list() # <- This will get populated 
     data3D["body"]  = list() # <- This will get populated 
     data3D["body"].append(list()) # <- This will get populated 
     for label in labels:
-      #------------------------------------------------
+    #------------------------------------------------
       x,y     = getJoint2DCoordinates(
                                       data2D["label"],
                                       data2D["body"],
@@ -469,9 +467,9 @@ def imageToCSV(data2D, img, sampleID, width=32, height=32, rnd=False, translatio
                                       sampleID
                                      )
       #------------------------------------------------
-      r = int( 255 * img[0][y][x])
-      g = int( 255 * img[1][y][x])
-      b = int( 255 * img[2][y][x])
+      r = int(255 * img[0][y][x])
+      g = int(255 * img[1][y][x])
+      b = int(255 * img[2][y][x])
       #------------------------------------------------
       val = convertRGBValueToDepth(r,g,b)
       print("label ",label," x=",x," y=",y," r=",r," g=",g," b=",b," val=",val)
