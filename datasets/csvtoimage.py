@@ -224,7 +224,7 @@ def getJoint3DCoordinatesNormalize(
 """
   Convert a Depth Value to RGB 
 """
-def convertDepthValueToRGB(depthValue,near=0,far=500):
+def convertDepthValueToRGB(depthValue,near=0,far=650):
    #https://sites.google.com/site/brainrobotdata/home/depth-image-encoding
    #https://developers.google.com/depthmap-metadata/encoding
    
@@ -250,7 +250,7 @@ def convertDepthValueToRGB(depthValue,near=0,far=500):
 """
   Convert an RGB encoded value back to the Depth Value 
 """
-def convertRGBValueToDepth(r,g,b,near=0,far=500):
+def convertRGBValueToDepth(r,g,b,near=0,far=650):
    #Make sure value is positive
    # r 
    upper8bits=int(g)
@@ -432,6 +432,10 @@ def csvToImage(data3D,data2D,sampleID, width=32, height=32, rnd=False, translati
         #img[0][yP2D][xP2D] = Pval
         #img[1][yP2D][xP2D] = Pval 
 
+    #print("Encode Min/Max R ",np.min(img[0][:][:]),np.max(img[0][:][:]))
+    #print("Encode Min/Max G ",np.min(img[1][:][:]),np.max(img[1][:][:]))
+    #print("Encode Min/Max B ",np.min(img[2][:][:]),np.max(img[2][:][:]))
+
     return img
 
 """
@@ -453,6 +457,10 @@ def imageToCSV(data2D, img, sampleID, width=32, height=32, rnd=False, translatio
     data3D["label"] = list() # <- This will get populated 
     data3D["body"]  = list() # <- This will get populated 
     data3D["body"].append(list()) # <- This will get populated 
+
+    print("Decode Min/Max R ",np.min(img[0][:][:]),np.max(img[0][:][:]))
+    print("Decode Min/Max G ",np.min(img[1][:][:]),np.max(img[1][:][:]))
+    print("Decode Min/Max B ",np.min(img[2][:][:]),np.max(img[2][:][:]))
     for label in labels:
     #------------------------------------------------
       x,y     = getJoint2DCoordinates(
@@ -467,9 +475,9 @@ def imageToCSV(data2D, img, sampleID, width=32, height=32, rnd=False, translatio
                                       sampleID
                                      )
       #------------------------------------------------
-      r = int(255 * img[0][y][x])
-      g = int(255 * img[1][y][x])
-      b = int(255 * img[2][y][x])
+      r = int(img[0][y][x])
+      g = int(img[1][y][x])
+      b = int(img[2][y][x])
       #------------------------------------------------
       val = convertRGBValueToDepth(r,g,b)
       print("label ",label," x=",x," y=",y," r=",r," g=",g," b=",b," val=",val)
@@ -489,10 +497,12 @@ def imageToCSV(data2D, img, sampleID, width=32, height=32, rnd=False, translatio
 
 if __name__ == "__main__":
     poses      = 100 
-    resolution = 64#150
-  
+    resolution = 64 #64#150
+    near = 0 
+    far  = 550
+
     import sys
-    for depthValue in range(50,450):
+    for depthValue in range(near,far):
        r,g,b = convertDepthValueToRGB(depthValue)
        depthValue2 = int(round(convertRGBValueToDepth(r,g,b)))
        if (depthValue2!=depthValue):
