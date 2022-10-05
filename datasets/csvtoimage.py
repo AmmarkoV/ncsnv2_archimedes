@@ -454,6 +454,16 @@ def imageToCSV(data2D, img, sampleID, width=32, height=32, rnd=False, translatio
     print("Decode Min/Max R ",np.min(img[0][:][:]),np.max(img[0][:][:]))
     print("Decode Min/Max G ",np.min(img[1][:][:]),np.max(img[1][:][:]))
     print("Decode Min/Max B ",np.min(img[2][:][:]),np.max(img[2][:][:]))
+
+    #Default Alignment
+    alignX2D = 0
+    alignY2D = 0
+    if (translationInvariant):
+       x2D,y2D = getJoint2DCoordinates(data2D["label"],data2D["body"],"hip",width,height,sampleID)
+       alignX2D = (width/2)  - x2D
+       alignY2D = (height/2) - y2D 
+
+
     for label in labels:
     #------------------------------------------------
       x,y     = getJoint2DCoordinates(
@@ -467,6 +477,8 @@ def imageToCSV(data2D, img, sampleID, width=32, height=32, rnd=False, translatio
                                       #----------------
                                       sampleID
                                      )
+      x = int(x+alignX2D)
+      y = int(y+alignY2D)
       #------------------------------------------------
       r = int(img[0][y][x])
       g = int(img[1][y][x])
@@ -530,7 +542,7 @@ if __name__ == "__main__":
             recoveredIDX   = recovered3D["label"].index(thisLabel)
             recoveredDepth = recovered3D["body"][0][recoveredIDX]
             #------------------------------------------------------
-            print("Depth Discrepancy %s = %f (org %f,rec %f)"%(label,recoveredDepth-originalDepth,originalDepth,recoveredDepth))
+            print("Depth Discrepancy %s = %f (org %f,rec %f)"%(label,originalDepth-recoveredDepth,originalDepth,recoveredDepth))
 
       imgSwapped = np.swapaxes(img,0,2)
       imgSwapped = np.swapaxes(imgSwapped,0,1)
