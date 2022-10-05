@@ -1,5 +1,5 @@
 import datasets.csvutils as csvutils 
-#import csvutils
+# import csvutils
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -179,12 +179,8 @@ def getJoint3DCoordinates(
           x2D  = int(min(width-1 ,width*joint2DBodyList[sampleID][idxX]))
           y2D  = int(min(height-1,height*joint2DBodyList[sampleID][idxY]))
           z3D  = int(joint3DBodyList[sampleID][idxZ])
-        
-         #print("getJoint3DCoordinates ",xLabel,",",yLabel," => ", x2D, y2D, z3D)
-         valueToColor = min(255,int(z3D * 255 / (-400)))
-         #print("  val ", valueToColor)
 
-         return x2D,y2D,valueToColor
+         return x2D, y2D, z3D
        #print("getJoint3DCoordinates could not find ",xLabel,",",yLabel," ")
        return 0,0,0
 
@@ -228,7 +224,7 @@ def convertDepthValueToRGB(depthValue,near=0,far=650):
    #https://sites.google.com/site/brainrobotdata/home/depth-image-encoding
    #https://developers.google.com/depthmap-metadata/encoding
    
-   #Make sure value is positive 
+   #Make sure the value is positive 
    depthValue=abs(depthValue)
   
    dNorm = (depthValue - near) / (far-near) 
@@ -377,7 +373,7 @@ def csvToImage(data3D,data2D,sampleID, width=32, height=32, rnd=False, translati
     alignX2D = 0
     alignY2D = 0
     if (translationInvariant):
-       x2D,y2D,val = getJoint3DCoordinates(data2D["label"],data2D["body"],data3D["label"],data3D["body"],"hip",width,height,sampleID)
+       x2D, y2D, _ = getJoint3DCoordinates(data2D["label"],data2D["body"],data3D["label"],data3D["body"],"hip",width,height,sampleID)
        alignX2D = (width/2)  - x2D
        alignY2D = (height/2) - y2D 
 
@@ -501,12 +497,13 @@ def imageToCSV(data2D, img, sampleID, width=32, height=32, rnd=False, translatio
 #---------------------------------------------------
 
 if __name__ == "__main__":
-    poses      = 100 
+    import sys
+
+    poses      = 10 
     resolution = 64 #64#150
     near = 0 
-    far  = 550
+    far  = 650
 
-    import sys
     for depthValue in range(near,far):
        r,g,b = convertDepthValueToRGB(depthValue)
        depthValue2 = int(round(convertRGBValueToDepth(r,g,b)))

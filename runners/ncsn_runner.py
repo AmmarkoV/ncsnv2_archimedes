@@ -118,9 +118,7 @@ class NCSNRunner():
                 X = X.to(self.config.device)
                 X = data_transform(self.config, X)
 
-                loss = anneal_dsm_score_estimation(score, X, sigmas, None,
-                                                   self.config.training.anneal_power,
-                                                   hook)
+                loss = anneal_dsm_score_estimation(score, X, sigmas, None, self.config.training.anneal_power, hook)
                 tb_logger.add_scalar('loss', loss, global_step=step)
                 tb_hook()
 
@@ -190,6 +188,7 @@ class NCSNRunner():
                                                   device=self.config.device)
                         init_samples = data_transform(self.config, init_samples)
 
+                                                                    #x0         model
                         all_samples = anneal_Langevin_dynamics(init_samples, test_score, sigmas.cpu().numpy(),
                                                                self.config.sampling.n_steps_each,
                                                                self.config.sampling.step_lr,

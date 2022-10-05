@@ -96,7 +96,7 @@ class NCSNv2(nn.Module):
 
         used_sigmas = self.sigmas[y].view(x.shape[0], *([1] * len(x.shape[1:])))
 
-        output = output / used_sigmas
+        output = output / used_sigmas # Technique 3: sθ(x)/σ
 
         return output
 

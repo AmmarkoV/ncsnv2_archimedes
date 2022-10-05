@@ -1,7 +1,7 @@
 training:
   batch_size: 64
   n_epochs: 500000
-  n_iters: 300001
+  n_iters: 300001 #steps
   snapshot_freq: 5000
   snapshot_sampling: true
   anneal_power: 2
@@ -48,13 +48,13 @@ data:
   num_workers: 4
 
 model:
-  sigma_begin: 50
-  num_classes: 232
+  sigma_begin: 50 #σ1
+  num_classes: 232 #L
   ema: true
   ema_rate: 0.999
   spec_norm: false
   sigma_dist: geometric
-  sigma_end: 0.01
+  sigma_end: 0.01 #σL
   normalization: InstanceNorm++
   nonlinearity: elu
   ngf: 128
