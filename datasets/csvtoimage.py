@@ -3,7 +3,6 @@ import datasets.csvutils as csvutils
 import numpy as np
 import matplotlib.pyplot as plt
 
-
 def getParentList():
  pl=dict()
  #---------------------------------------------------
@@ -117,7 +116,6 @@ def weighted_line(r0, c0, r1, c1, w, rmin=0, rmax=np.inf):
 #---------------------------------------------------
 #---------------------------------------------------
 
-
 def getJoint2DCoordinates(
                         joint2DLabelList,
                         joint2DBodyList,
@@ -150,7 +148,6 @@ def getJoint2DCoordinates(
          return x2D,y2D
        #print("getJoint2DCoordinates could not find ",xLabel,",",yLabel," ")
        return 0,0
-
 
 def getJoint3DCoordinates(
                         joint2DLabelList,
@@ -192,8 +189,6 @@ def getJoint3DCoordinates(
        #print("getJoint3DCoordinates could not find ",xLabel,",",yLabel," ")
        return 0,0,0
 
-
-
 def getJoint3DCoordinatesNormalize(
                         joint2DLabelList,
                         joint2DBodyList,
@@ -223,7 +218,6 @@ def getJoint3DCoordinatesNormalize(
                                     sampleID
                                    )
   return float(x2D/width),float(y2D/height),float(val/255)
-
 
 #---------------------------------------------------
 #---------------------------------------------------
@@ -456,20 +450,38 @@ def imageToCSV(data2D, image, sampleID, width=32, height=32, rnd=False, translat
        labels.append(tokens[1]+'_'+tokens[2])
     labels = list(set(labels))
     print("Labels ",labels)
-
-
-    x2D,y2D = getJoint2DCoordinates(
-                                    data2D["label"],
-                                    data2D["body"],
-                                    #----------------
-                                    label,
-                                    #----------------
-                                    width,
-                                    height,
-                                    #----------------
-                                    sampleID
-                                   )
-    data3D = dict()
+    
+    
+    data3D          = dict() # <- This will get populated 
+    data3D["label"] = list() # <- This will get populated 
+    data3D["body"]  = list() # <- This will get populated 
+    data3D["body"].append(list()) # <- This will get populated 
+    for label in labels:
+      #------------------------------------------------
+      x2D,y2D = getJoint2DCoordinates(
+                                      data2D["label"],
+                                      data2D["body"],
+                                      #----------------
+                                      label,
+                                      #----------------
+                                      width,
+                                      height,
+                                      #----------------
+                                      sampleID
+                                     )
+      #------------------------------------------------
+      r = img[0][y][x]
+      g = img[1][y][x]
+      b = img[2][y][x]
+      #------------------------------------------------
+      val = convertRGBValueToDepth(r,g,b):
+      data3D["label"].append("3DX_%s" % label)
+      data3D["body"][0].append(float(x))
+      data3D["label"].append("3DY_%s" % label)
+      data3D["body"][0].append(float(y))
+      data3D["label"].append("3DZ_%s" % label)
+      data3D["body"][0].append(float(val)) 
+    return data3D
 
 #---------------------------------------------------
 #---------------------------------------------------
@@ -494,8 +506,10 @@ if __name__ == "__main__":
 
     for p in range(poses):
       print("Dumping pose ",p)
-      img = csvToImage(pose3d, pose2d, p, resolution, resolution)
-      
+      img = csvToImage(pose3d,pose2d,p,resolution,resolution)
+      recovered3D = imageToCSV(pose2d,img,p,resolution,resolution)
+
+
       imgSwapped = np.swapaxes(img,0,2)
       imgSwapped = np.swapaxes(imgSwapped,0,1)
       fig = plt.imshow(imgSwapped.astype(np.uint8))
