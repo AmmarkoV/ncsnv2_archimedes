@@ -507,19 +507,28 @@ if __name__ == "__main__":
     import sys
 
     poses      = 10 
-    resolution = 64 #64#150
+    resolution = 150 #64#150
     near = 0 
     far  = 650
 
+    legendStepX=list()
+    legendStepY=list()
+    legendColor=list()
     for depthValue in range(near,far):
        r,g,b = convertDepthValueToRGB(depthValue)
+       legendStepX.append(depthValue)
+       legendStepY.append(0)
+       legendColor.append([r/255,g/255,b/255]) 
        depthValue2 = int(round(convertRGBValueToDepth(r,g,b)))
        if (depthValue2!=depthValue):
           print("Mismatch at Depth ",depthValue," -> R ",r," G ",g," B ",b," -> ",depthValue2)
           sys.exit(0)
     print("All Depth->RGB->Depth conversions are happening successfuly")
     #sys.exit(0)
-  
+    plt.scatter(legendStepX,legendStepY, s=1000, color=legendColor)
+    plt.show()
+
+
     pose2d=csvutils.readCSVFile("exp/datasets/cmubvh/2d_body_all.csv",memPercentage=poses)
     pose3d=csvutils.readCSVFile("exp/datasets/cmubvh/3d_body_all.csv",memPercentage=poses)
 
@@ -551,8 +560,13 @@ if __name__ == "__main__":
       imgSwapped = np.swapaxes(img,0,2)
       imgSwapped = np.swapaxes(imgSwapped,0,1)
       fig = plt.imshow(imgSwapped.astype(np.uint8))
+
+
+    
       # fig.axes.get_xaxis().set_visible(False)
       # fig.axes.get_yaxis().set_visible(False)
       plt.imsave(f'debug/pose{p}.png',imgSwapped.astype(np.uint8))
       plt.savefig(f'debug/fig{p}.png')
       plt.cla()
+
+
