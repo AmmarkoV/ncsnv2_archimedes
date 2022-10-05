@@ -139,10 +139,6 @@ def getJoint2DCoordinates(
          else:
           x2D  = int(min(width-1 ,width*joint2DBodyList[sampleID][idxX]))
           y2D  = int(min(height-1,height*joint2DBodyList[sampleID][idxY]))
-        
-         #print("getJoint2DCoordinates ",xLabel,",",yLabel," => ", x2D, y2D, z3D)
-         #valueToColor = min(255,int(z3D * 255 / (-400)))
-         #print("  val ", valueToColor)
 
          return x2D,y2D
        #print("getJoint2DCoordinates could not find ",xLabel,",",yLabel," ")
@@ -162,57 +158,32 @@ def getJoint3DCoordinates(
                         #----------------
                         sampleID
                        ):
-       xLabel = "2DX_"+label
-       yLabel = "2DY_"+label
+       #We reuse the code for 2D coordinates to reduce code surface!
+       x2D, y2D = getJoint2DCoordinates(
+                                        joint2DLabelList,
+                                        joint2DBodyList,
+                                        #----------------
+                                        label,
+                                        #----------------
+                                        width,
+                                        height,
+                                        #----------------
+                                        sampleID
+                                       ) 
+       #We extract the 3D value and return it!
        zLabel = "3DZ_"+label
-       if (xLabel in joint2DLabelList) and ( yLabel in joint2DLabelList):
-
-         idxX = joint2DLabelList.index(xLabel)
-         idxY = joint2DLabelList.index(yLabel)
+       if (zLabel in joint3DLabelList):
          idxZ = joint3DLabelList.index(zLabel)
         
          if (len(joint2DBodyList.shape)==1):
-          x2D  = int(min(width-1 ,width*joint2DBodyList[idxX]))
-          y2D  = int(min(height-1,height*joint2DBodyList[idxY]))
           z3D  = int(joint3DBodyList[idxZ])
          else:
-          x2D  = int(min(width-1 ,width*joint2DBodyList[sampleID][idxX]))
-          y2D  = int(min(height-1,height*joint2DBodyList[sampleID][idxY]))
           z3D  = int(joint3DBodyList[sampleID][idxZ])
 
          return x2D, y2D, z3D
        #print("getJoint3DCoordinates could not find ",xLabel,",",yLabel," ")
        return 0,0,0
 
-def getJoint3DCoordinatesNormalize(
-                        joint2DLabelList,
-                        joint2DBodyList,
-                        #----------------
-                        joint3DLabelList,
-                        joint3DBodyList,
-                        #----------------
-                        label,
-                        #----------------
-                        width,
-                        height,
-                        #----------------
-                        sampleID
-                       ):
-  x2D,y2D,val = getJoint3DCoordinates(
-                                    joint2DLabelList,
-                                    joint2DBodyList,
-                                    #----------------
-                                    joint3DLabelList,
-                                    joint3DBodyList,
-                                    #----------------
-                                    label,
-                                    #----------------
-                                    width,
-                                    height,
-                                    #----------------
-                                    sampleID
-                                   )
-  return float(x2D/width),float(y2D/height),float(val/255)
 #---------------------------------------------------
 #---------------------------------------------------
 #---------------------------------------------------
@@ -301,6 +272,36 @@ def extractListOfLabelsWithoutCoordinates(origin):
 #---------------------------------------------------
 #---------------------------------------------------
 #---------------------------------------------------
+def getJoint3DCoordinatesNormalize(
+                        joint2DLabelList,
+                        joint2DBodyList,
+                        #----------------
+                        joint3DLabelList,
+                        joint3DBodyList,
+                        #----------------
+                        label,
+                        #----------------
+                        width,
+                        height,
+                        #----------------
+                        sampleID
+                       ):
+  x2D,y2D,val = getJoint3DCoordinates(
+                                    joint2DLabelList,
+                                    joint2DBodyList,
+                                    #----------------
+                                    joint3DLabelList,
+                                    joint3DBodyList,
+                                    #----------------
+                                    label,
+                                    #----------------
+                                    width,
+                                    height,
+                                    #----------------
+                                    sampleID
+                                   )
+  return float(x2D/width),float(y2D/height),float(val/255)
+
 def csvToImageDigitalEncoding(data3D,data2D,sampleID, width=32, height=32):
     #First failed experiment with zeros!
     #img = np.zeros((3,width,height))
@@ -339,6 +340,12 @@ def csvToImageDigitalEncoding(data3D,data2D,sampleID, width=32, height=32):
        #print("Label ",label," x=",x2D," y=",y2D," v=",val," => xS=",xS," yS=",yS," encX=",encX," => encY=",encY," encV=",encV)
    
     return img
+#---------------------------------------------------
+#---------------------------------------------------
+#---------------------------------------------------
+
+
+
 
 """
   Convert CSV 2D + 3D Data to an RGB Image!
