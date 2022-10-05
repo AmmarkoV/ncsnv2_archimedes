@@ -286,6 +286,22 @@ def interpolateValue(sX,sY,sV,tX,tY,tV,currentX,currentY):
    value = value + tV * (distanceToTarget/distanceFull)
    return value
 
+
+def extractListOfLabelsWithoutCoordinates(origin):
+    labels = list()
+    #Gather all labels from our 3D data
+    for label in origin:
+      tokens = label.split('_')
+      if (len(tokens)==2):
+       labels.append(tokens[1])
+      if (len(tokens)==3):
+       labels.append(tokens[1]+'_'+tokens[2])
+    labels = list(set(labels))
+    #print("Labels ",labels)
+    return labels
+
+
+
 #---------------------------------------------------
 #---------------------------------------------------
 #---------------------------------------------------
@@ -296,15 +312,8 @@ def csvToImageDigitalEncoding(data3D,data2D,sampleID, width=32, height=32):
     bkg  = np.random.rand()
     img = np.full((3,width,height),bkg)
 
-    labels = list()
-    #Gather all labels from our 3D data
-    for label in data3D["label"]:
-      tokens = label.split('_')
-      if (len(tokens)==2):
-       labels.append(tokens[1])
-      if (len(tokens)==3):
-       labels.append(tokens[1]+'_'+tokens[2])
-    labels = list(set(labels))
+
+    labels = extractListOfLabelsWithoutCoordinates(data3D["label"])
     #print("Labels ",labels)
  
     if (len(labels)==0):
@@ -357,16 +366,8 @@ def csvToImage(data3D,data2D,sampleID, width=32, height=32, rnd=False, translati
         for y in range(0,height):
           img[:,:,y]=float(y*(abs(bkg2-bkg)/height))
         
-    labels = list()
-    #Gather all labels from our 3D data
-    for label in data3D["label"]:
-      tokens = label.split('_')
-      if (len(tokens)==2):
-       labels.append(tokens[1])
-      if (len(tokens)==3):
-       labels.append(tokens[1]+'_'+tokens[2])
-    labels = list(set(labels))
-    #print("Labels ",labels)
+
+    labels = extractListOfLabelsWithoutCoordinates(data3D["label"])
 
     if (len(labels)==0):
       print("Sample ",sampleID," is empty")
@@ -442,16 +443,8 @@ def csvToImage(data3D,data2D,sampleID, width=32, height=32, rnd=False, translati
   Convert CSV 2D Data + Image to 3D Data!
 """ 
 def imageToCSV(data2D, img, sampleID, width=32, height=32, rnd=False, translationInvariant=True, interpolateDepth=True, bkg=0.5, encoding=False):
-    labels = list()
-    #Gather all labels from our 3D data
-    for label in data2D["label"]:
-      tokens = label.split('_')
-      if (len(tokens)==2):
-       labels.append(tokens[1])
-      if (len(tokens)==3):
-       labels.append(tokens[1]+'_'+tokens[2])
-    labels = list(set(labels))
-    #print("Labels ",labels)
+    #------------------------------------------------
+    labels = extractListOfLabelsWithoutCoordinates(data2D["label"])
     #------------------------------------------------
     data3D          = dict() # <- This will get populated 
     data3D["label"] = list() # <- This will get populated 
@@ -514,15 +507,8 @@ if __name__ == "__main__":
     pose2d=csvutils.readCSVFile("exp/datasets/cmubvh/2d_body_all.csv",memPercentage=poses)
     pose3d=csvutils.readCSVFile("exp/datasets/cmubvh/3d_body_all.csv",memPercentage=poses)
 
-    labels = list()
-    #Gather all labels from our 3D data
-    for label in pose2d["label"]:
-      tokens = label.split('_')
-      if (len(tokens)==2):
-       labels.append(tokens[1])
-      if (len(tokens)==3):
-       labels.append(tokens[1]+'_'+tokens[2])
-    labels = list(set(labels))
+    #-----------------------------------
+    labels = extractListOfLabelsWithoutCoordinates(pose2d["label"])
     #-----------------------------------
     print("Labels 2D ",pose2d["label"])
     print("Labels 3D ",pose3d["label"])
