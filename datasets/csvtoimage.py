@@ -537,12 +537,12 @@ if __name__ == "__main__":
           if (thisLabel in pose3d["label"]) and (thisLabel in recovered3D["label"]):
             #------------------------------------------------------
             originalIDX    = pose3d["label"].index(thisLabel)
-            originalDepth  = pose3d["body"][p][originalIDX]
+            originalDepth  = abs(pose3d["body"][p][originalIDX])
             #------------------------------------------------------
             recoveredIDX   = recovered3D["label"].index(thisLabel)
             recoveredDepth = recovered3D["body"][0][recoveredIDX]
             #------------------------------------------------------
-            print("Depth Discrepancy %s = %f (org %f,rec %f)"%(label,originalDepth-recoveredDepth,originalDepth,recoveredDepth))
+            print("Depth Discrepancy %s = %f (org %f,rec %f)"%(label,abs(originalDepth-recoveredDepth),originalDepth,recoveredDepth))
 
       imgSwapped = np.swapaxes(img,0,2)
       imgSwapped = np.swapaxes(imgSwapped,0,1)
