@@ -406,6 +406,9 @@ def csvToImage(data3D,data2D,sampleID, width=32, height=32, rnd=False, translati
         yP2D = int(min(height-2,yP2D))
         #---------------------------
         
+        #TODO : 
+        # if ( greenExisting < smallerThanNew ) or ( ( greenExisting == smallerThanNew ) and ( blueExisting == smallerThanNew )   ) 
+        #  RESPECT DEPTH ORDER 
         y,x,foo = draw_line(y2D,x2D,yP2D,xP2D)
         if (type(y)==float) or (type(y)==int): 
          img[0][y][x] = 255 #Keypoint should be marked! r
