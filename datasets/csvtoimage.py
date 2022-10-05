@@ -439,7 +439,7 @@ def csvToImage(data3D,data2D,sampleID, width=32, height=32, rnd=False, translati
 """
   Convert CSV 2D Data + Image to 3D Data!
 """ 
-def imageToCSV(data2D, image, sampleID, width=32, height=32, rnd=False, translationInvariant=True, interpolateDepth=True, bkg=0.5, encoding=False):
+def imageToCSV(data2D, img, sampleID, width=32, height=32, rnd=False, translationInvariant=True, interpolateDepth=True, bkg=0.5, encoding=False):
     labels = list()
     #Gather all labels from our 3D data
     for label in data2D["label"]:
@@ -449,16 +449,15 @@ def imageToCSV(data2D, image, sampleID, width=32, height=32, rnd=False, translat
       if (len(tokens)==3):
        labels.append(tokens[1]+'_'+tokens[2])
     labels = list(set(labels))
-    print("Labels ",labels)
-    
-    
+    #print("Labels ",labels)
+      #------------------------------------------------
     data3D          = dict() # <- This will get populated 
     data3D["label"] = list() # <- This will get populated 
     data3D["body"]  = list() # <- This will get populated 
     data3D["body"].append(list()) # <- This will get populated 
     for label in labels:
       #------------------------------------------------
-      x2D,y2D = getJoint2DCoordinates(
+      x,y     = getJoint2DCoordinates(
                                       data2D["label"],
                                       data2D["body"],
                                       #----------------
@@ -470,17 +469,20 @@ def imageToCSV(data2D, image, sampleID, width=32, height=32, rnd=False, translat
                                       sampleID
                                      )
       #------------------------------------------------
-      r = img[0][y][x]
-      g = img[1][y][x]
-      b = img[2][y][x]
+      r = int( 255 * img[0][y][x])
+      g = int( 255 * img[1][y][x])
+      b = int( 255 * img[2][y][x])
       #------------------------------------------------
       val = convertRGBValueToDepth(r,g,b)
+      print("label ",label," x=",x," y=",y," r=",r," g=",g," b=",b," val=",val)
+      #------------------------------------------------
       data3D["label"].append("3DX_%s" % label)
       data3D["body"][0].append(float(x))
       data3D["label"].append("3DY_%s" % label)
       data3D["body"][0].append(float(y))
       data3D["label"].append("3DZ_%s" % label)
       data3D["body"][0].append(float(val)) 
+      #------------------------------------------------
     return data3D
 
 #---------------------------------------------------
@@ -504,16 +506,43 @@ if __name__ == "__main__":
     pose2d=csvutils.readCSVFile("exp/datasets/cmubvh/2d_body_all.csv",memPercentage=poses)
     pose3d=csvutils.readCSVFile("exp/datasets/cmubvh/3d_body_all.csv",memPercentage=poses)
 
+    labels = list()
+    #Gather all labels from our 3D data
+    for label in pose2d["label"]:
+      tokens = label.split('_')
+      if (len(tokens)==2):
+       labels.append(tokens[1])
+      if (len(tokens)==3):
+       labels.append(tokens[1]+'_'+tokens[2])
+    labels = list(set(labels))
+    #-----------------------------------
+    print("Labels 2D ",pose2d["label"])
+    print("Labels 3D ",pose3d["label"])
+    print("Labels ",labels)
+
     for p in range(poses):
       print("Dumping pose ",p)
-      img = csvToImage(pose3d,pose2d,p,resolution,resolution)
+      img         = csvToImage(pose3d,pose2d,p,resolution,resolution)
       recovered3D = imageToCSV(pose2d,img,p,resolution,resolution)
 
+      #print("Labels 3D ",recovered3D["label"])
+      for label in labels:
+          thisLabel = "3DZ_%s" % label
+          if (thisLabel in pose3d["label"]) and (thisLabel in recovered3D["label"]):
+            #------------------------------------------------------
+            originalIDX    = pose3d["label"].index(thisLabel)
+            originalDepth  = pose3d["body"][p][originalIDX]
+            #------------------------------------------------------
+            recoveredIDX   = recovered3D["label"].index(thisLabel)
+            recoveredDepth = recovered3D["body"][0][recoveredIDX]
+            #------------------------------------------------------
+            print("Depth Discrepancy %s = %f (org %f,rec %f)"%(label,recoveredDepth-originalDepth,originalDepth,recoveredDepth))
 
       imgSwapped = np.swapaxes(img,0,2)
       imgSwapped = np.swapaxes(imgSwapped,0,1)
       fig = plt.imshow(imgSwapped.astype(np.uint8))
       # fig.axes.get_xaxis().set_visible(False)
       # fig.axes.get_yaxis().set_visible(False)
-      plt.savefig(f'debug/pose{p}.png')
+      plt.imsave(f'debug/pose{p}.png',imgSwapped.astype(np.uint8))
+      plt.savefig(f'debug/fig{p}.png')
       plt.cla()
