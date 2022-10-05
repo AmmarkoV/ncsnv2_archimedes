@@ -526,7 +526,8 @@ if __name__ == "__main__":
     print("All Depth->RGB->Depth conversions are happening successfuly")
     #sys.exit(0)
     plt.scatter(legendStepX,legendStepY, s=1000, color=legendColor)
-    plt.show()
+    #plt.show()
+    plt.savefig(f'debug/colormap.png')
 
 
     pose2d=csvutils.readCSVFile("exp/datasets/cmubvh/2d_body_all.csv",memPercentage=poses)
