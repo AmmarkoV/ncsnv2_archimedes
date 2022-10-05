@@ -528,6 +528,7 @@ if __name__ == "__main__":
     plt.scatter(legendStepX,legendStepY, s=1000, color=legendColor)
     #plt.show()
     plt.savefig(f'debug/colormap.png')
+    plt.cla()
 
 
     pose2d=csvutils.readCSVFile("exp/datasets/cmubvh/2d_body_all.csv",memPercentage=poses)
