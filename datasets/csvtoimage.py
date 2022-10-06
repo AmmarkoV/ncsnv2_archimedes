@@ -343,8 +343,31 @@ def csvToImageDigitalEncoding(data3D,data2D,sampleID, width=32, height=32):
 #---------------------------------------------------
 #---------------------------------------------------
 #---------------------------------------------------
+"""
+  Write depth values taking account depth
+"""
+def projectDepthPointTo2DTakingOrderIntoAccount(img,x,y,r,g,b):
+    pR = img[0][y][x] 
+    pG = img[1][y][x] 
+    pB = img[2][y][x] 
+    if ( pG < g ) or ( ( pG == g ) and ( pB < b ) ): 
+       img[0][y][x] = r #Keypoint should be marked! r
+       img[1][y][x] = g
+       img[2][y][x] = b
+    return img
 
-
+"""
+  Randomize depth components of image
+"""
+def randomizeImageDepth(img,width=32,height=32):
+  from random import randint
+  for y in range(0,height):
+    for x in range(0,width):   
+         if ( (img[0][y][x]!=0) or (img[1][y][x]!=0) or (img[2][y][x]!=0) ):
+          #if not completely black   
+          img[1][y][x] = randint(0, 255)
+          img[2][y][x] = randint(0, 255)
+  return img
 
 
 """
@@ -405,19 +428,17 @@ def csvToImage(data3D,data2D,sampleID, width=32, height=32, rnd=False, translati
         xP2D = int(min(width-2 ,xP2D))
         yP2D = int(min(height-2,yP2D))
         #---------------------------
-        
-        #TODO : 
-        # if ( greenExisting < smallerThanNew ) or ( ( greenExisting == smallerThanNew ) and ( blueExisting == smallerThanNew )   ) 
-        #  RESPECT DEPTH ORDER 
         y,x,foo = draw_line(y2D,x2D,yP2D,xP2D)
         if (type(y)==float) or (type(y)==int): 
-         img[0][y][x] = 255 #Keypoint should be marked! r
-         img[1][y][x] = g
-         img[2][y][x] = b
+         #img[0][y][x] = 255 #Keypoint should be marked! r
+         #img[1][y][x] = g
+         #img[2][y][x] = b
+         img = projectDepthPointTo2DTakingOrderIntoAccount(img,x,y,255,g,b)
         elif (type(x)==float) or (type(x)==int):
-         img[0][y][x] = 255 #Keypoint should be marked! r
-         img[1][y][x] = g
-         img[2][y][x] = b
+         #img[0][y][x] = 255 #Keypoint should be marked! r
+         #img[1][y][x] = g
+         #img[2][y][x] = b
+         img = projectDepthPointTo2DTakingOrderIntoAccount(img,x,y,255,g,b)
         else:
          #By default a blue line between joints
          iR = 0
@@ -427,14 +448,15 @@ def csvToImage(data3D,data2D,sampleID, width=32, height=32, rnd=False, translati
            if (interpolateDepth):
              interpolatedValue = interpolateValue(x2D,y2D,val,xP2D,yP2D,Pval,x[i],y[i])
              iR,iG,iB = convertDepthValueToRGB(interpolatedValue)
-           img[0][y[i]][x[i]] = iR
-           img[1][y[i]][x[i]] = iG
-           img[2][y[i]][x[i]] = iB
-
+           #img[0][y[i]][x[i]] = iR
+           #img[1][y[i]][x[i]] = iG
+           #img[2][y[i]][x[i]] = iB
+           img = projectDepthPointTo2DTakingOrderIntoAccount(img,x[i],y[i],iR,iG,iB)
         #------------------------- 
-        img[0][y2D][x2D]   = 255# Keypoint should be marked!r
-        img[1][y2D][x2D]   = g
-        img[2][y2D][x2D]   = b
+        #img[0][y2D][x2D]   = 255# Keypoint should be marked!r
+        #img[1][y2D][x2D]   = g
+        #img[2][y2D][x2D]   = b
+        img = projectDepthPointTo2DTakingOrderIntoAccount(img,x2D,y2D,255,g,b)
         #-------------------------
         #img[0][yP2D][xP2D] = Pval
         #img[1][yP2D][xP2D] = Pval 
@@ -457,9 +479,9 @@ def imageToCSV(data2D, img, sampleID, width=32, height=32, rnd=False, translatio
     data3D["body"]  = list() # <- This will get populated 
     data3D["body"].append(list()) # <- This will get populated 
 
-    print("Decode Min/Max R ",np.min(img[0][:][:]),np.max(img[0][:][:]))
-    print("Decode Min/Max G ",np.min(img[1][:][:]),np.max(img[1][:][:]))
-    print("Decode Min/Max B ",np.min(img[2][:][:]),np.max(img[2][:][:]))
+    #print("Decode Min/Max R ",np.min(img[0][:][:]),np.max(img[0][:][:]))
+    #print("Decode Min/Max G ",np.min(img[1][:][:]),np.max(img[1][:][:]))
+    #print("Decode Min/Max B ",np.min(img[2][:][:]),np.max(img[2][:][:]))
 
     #Default Alignment
     alignX2D = 0
@@ -527,9 +549,7 @@ if __name__ == "__main__":
           print("Mismatch at Depth ",depthValue," -> R ",r," G ",g," B ",b," -> ",depthValue2)
           sys.exit(0)
     print("All Depth->RGB->Depth conversions are happening successfuly")
-    #sys.exit(0)
     plt.scatter(legendStepX,legendStepY, s=1000, color=legendColor)
-    #plt.show()
     plt.savefig(f'debug/colormap.png')
     plt.cla()
 
@@ -547,6 +567,7 @@ if __name__ == "__main__":
     for p in range(poses):
       print("Dumping pose ",p)
       img         = csvToImage(pose3d,pose2d,p,resolution,resolution)
+      #img         = randomizeImageDepth(img,resolution,resolution) #<- Randomize
       recovered3D = imageToCSV(pose2d,img,p,resolution,resolution)
 
       #print("Labels 3D ",recovered3D["label"])
@@ -566,8 +587,6 @@ if __name__ == "__main__":
       imgSwapped = np.swapaxes(imgSwapped,0,1)
       fig = plt.imshow(imgSwapped.astype(np.uint8))
 
-
-    
       # fig.axes.get_xaxis().set_visible(False)
       # fig.axes.get_yaxis().set_visible(False)
       plt.imsave(f'debug/pose{p}.png',imgSwapped.astype(np.uint8))
