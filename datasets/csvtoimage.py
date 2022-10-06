@@ -23,8 +23,8 @@ def getParentList():
  pl["chest"]="hip"                #4
  pl["eye.l"]="head"               #5    
  pl["eye.r"]="head"               #6   
- pl["EndSite_eye.l"]="eye.l"      #5    
- pl["EndSite_eye.r"]="eye.r"      #6   
+ pl["EndSite_eye.l"]="head"       #5 eye.l is eliminated 
+ pl["EndSite_eye.r"]="head"       #6 eye.r is eliminated 
  pl["rshoulder"]="neck"           #7    
  pl["relbow"]="rshoulder"         #8      
  pl["rhand"]="relbow"             #9
@@ -36,15 +36,15 @@ def getParentList():
  pl["rfoot"]="rknee"              #15
  pl["toe1-2.r"]="rfoot"           #16
  pl["toe5-3.r"]="rfoot"           #17
- pl["EndSite_toe1-2.r"]="toe1-2.r"#16
- pl["EndSite_toe5-3.r"]="toe5-3.r"#17
+ pl["EndSite_toe1-2.r"]="rfoot"   #16 toe1-2.r is eliminated 
+ pl["EndSite_toe5-3.r"]="rfoot"   #17 toe5-3.r is eliminated 
  pl["lhip"]="hip"                 #18
  pl["lknee"]="lhip"               #19
  pl["lfoot"]="lknee"              #20
  pl["toe1-2.l"]="lfoot"           #21
  pl["toe5-3.l"]="lfoot"           #22
- pl["EndSite_toe1-2.l"]="toe1-2.l"#21
- pl["EndSite_toe5-3.l"]="toe5-3.l"#22
+ pl["EndSite_toe1-2.l"]="lfoot"   #21 toe1-2.l is eliminated 
+ pl["EndSite_toe5-3.l"]="lfoot"   #22 toe5-3.l is eliminated 
  return pl
 #---------------------------------------------------
 parentList = getParentList()
