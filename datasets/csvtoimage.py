@@ -533,7 +533,8 @@ def imageToCSV(data2D, img, sampleID, width=32, height=32, rnd=False, translatio
       b = int(img[2][y][x])
       #------------------------------------------------
       val = convertRGBValueToDepth(r,g,b)
-      print("label ",label," x=",x," y=",y," r=",r," g=",g," b=",b," val=",val)
+      #Debug message
+      #print("label ",label," x=",x," y=",y," r=",r," g=",g," b=",b," val=",val)
       #------------------------------------------------
       data3D["label"].append("3DX_%s" % label)
       data3D["body"][0].append(float(x))
