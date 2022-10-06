@@ -139,7 +139,6 @@ def getJoint2DCoordinates(
        xLabel = "2DX_"+label
        yLabel = "2DY_"+label
        if (xLabel in joint2DLabelList) and ( yLabel in joint2DLabelList):
-
          idxX = joint2DLabelList.index(xLabel)
          idxY = joint2DLabelList.index(yLabel)
         
@@ -151,7 +150,7 @@ def getJoint2DCoordinates(
           y2D  = int(min(height-1,height*joint2DBodyList[sampleID][idxY]))
 
          return x2D,y2D
-       #print("getJoint2DCoordinates could not find ",xLabel,",",yLabel," ")
+       print(bcolors.FAIL,"getJoint2DCoordinates could not find ",xLabel,",",yLabel," ",bcolors.ENDC)
        return 0,0
 
 def getJoint3DCoordinates(
@@ -191,7 +190,7 @@ def getJoint3DCoordinates(
           z3D  = int(joint3DBodyList[sampleID][idxZ])
 
          return x2D, y2D, z3D
-       #print("getJoint3DCoordinates could not find ",xLabel,",",yLabel," ")
+       print(bcolors.FAIL,"getJoint3DCoordinates could not find ",xLabel,",",yLabel," ",bcolors.ENDC)
        return 0,0,0
 
 #---------------------------------------------------
@@ -318,7 +317,7 @@ def csvToImageDigitalEncoding(data3D,data2D,sampleID, width=32, height=32):
     img = np.full((3,width,height),bkg)
 
 
-    labels = extractListOfLabelsWithoutCoordinates(data3D["label"])
+    labels = extractListOfLabelsWithoutCoordinates(data2D["label"])
     #print("Labels ",labels)
  
     if (len(labels)==0):
@@ -366,8 +365,10 @@ def projectDepthPointTo2DTakingOrderIntoAccount(img,x,y,r,g,b):
     pR = img[0][y][x] 
     pG = img[1][y][x] 
     pB = img[2][y][x] 
+    if (pR<r):
+       img[0][y][x] = r #Keypoint should be marked and stay marked regardless of order
+
     if ( pG < g ) or ( ( pG == g ) and ( pB < b ) ): 
-       img[0][y][x] = r #Keypoint should be marked! r
        img[1][y][x] = g
        img[2][y][x] = b
     return img
@@ -389,13 +390,12 @@ def randomizeImageDepth(img,width=32,height=32):
 """
   Convert CSV 2D + 3D Data to an RGB Image!
 """
-def csvToImage(data3D,data2D,sampleID, width=32, height=32, rnd=False, translationInvariant=True, interpolateDepth=True, bkg=0.5, encoding=False):
+def csvToImage(data3D,data2D,sampleID, width=32, height=32, rnd=False, translationInvariant=True, interpolateDepth=True, bkg=0, encoding=False):
     if (encoding):
         return csvToImageDigitalEncoding(data3D,data2D,sampleID,width=width,height=height)
 
-    #First failed experiment with zeros!
-    #img = np.zeros((3,width,height))
-    #Second experiment will use 0.5 as background
+    #Handle background
+    #---------------------------------------------------------------
     if not rnd:
         img = np.full((3,width,height),bkg)
     else:
@@ -407,9 +407,11 @@ def csvToImage(data3D,data2D,sampleID, width=32, height=32, rnd=False, translati
         img  = np.full((3,width,height),bkg)
         for y in range(0,height):
           img[:,:,y]=float(y*(abs(bkg2-bkg)/height))
-        
+    #---------------------------------------------------------------
+    #---------------------------------------------------------------
+    #---------------------------------------------------------------
 
-    labels = extractListOfLabelsWithoutCoordinates(data3D["label"])
+    labels = extractListOfLabelsWithoutCoordinates(data2D["label"])
 
     if (len(labels)==0):
       print("Sample ",sampleID," is empty")
@@ -425,11 +427,19 @@ def csvToImage(data3D,data2D,sampleID, width=32, height=32, rnd=False, translati
 
 
     for label in labels:
+       #The R,G,B Value to be filled in @ x2D,y2D  a.k.a. our point
        x2D,y2D,val        = getJoint3DCoordinates(data2D["label"],data2D["body"],data3D["label"],data3D["body"],label,width,height,sampleID)
        r,g,b = convertDepthValueToRGB(val)
 
+       #The R,G,B Value to be filled in @ xP2D,yP2D  a.k.a. our parent point
        xP2D,yP2D,Pval     = getJoint3DCoordinates(data2D["label"],data2D["body"],data3D["label"],data3D["body"],parentList[label],width,height,sampleID)
- 
+       
+
+       #if not label in data2D["label"]:
+       #   print(label," not in data2D")
+       #if not parentList[label] in data2D["label"]:
+       #   print("Parent ",parentList[label]," of ",label," not in data2D")
+
        #Do alignment
        if (x2D!=0) and (y2D!=0) and (xP2D!=0) and (yP2D!=0):
         x2D  = int(x2D  + alignX2D)
@@ -444,6 +454,8 @@ def csvToImage(data3D,data2D,sampleID, width=32, height=32, rnd=False, translati
         xP2D = int(min(width-2 ,xP2D))
         yP2D = int(min(height-2,yP2D))
         #---------------------------
+
+        #Draw a line from our point back to the parent point!
         y,x,foo = draw_line(y2D,x2D,yP2D,xP2D)
         if (type(y)==float) or (type(y)==int):
          img = projectDepthPointTo2DTakingOrderIntoAccount(img,x,y,255,g,b)
@@ -455,6 +467,7 @@ def csvToImage(data3D,data2D,sampleID, width=32, height=32, rnd=False, translati
          iG = 0 
          iB = 255
          for i in range(0,len(y)):
+           #The blue line can however be overriden
            if (interpolateDepth):
              interpolatedValue = interpolateValue(x2D,y2D,val,xP2D,yP2D,Pval,x[i],y[i])
              iR,iG,iB = convertDepthValueToRGB(interpolatedValue)
@@ -494,8 +507,7 @@ def imageToCSV(data2D, img, sampleID, width=32, height=32, rnd=False, translatio
        x2D,y2D = getJoint2DCoordinates(data2D["label"],data2D["body"],"hip",width,height,sampleID)
        alignX2D = (width/2)  - x2D
        alignY2D = (height/2) - y2D 
-
-
+ 
     for label in labels:
     #------------------------------------------------
       x,y     = getJoint2DCoordinates(
@@ -509,8 +521,12 @@ def imageToCSV(data2D, img, sampleID, width=32, height=32, rnd=False, translatio
                                       #----------------
                                       sampleID
                                      )
+      #Redo alignment step
       x = int(x+alignX2D)
       y = int(y+alignY2D)
+      #Horrible hack to not get out of bounds
+      x = int(min(width-2 ,x))
+      y = int(min(height-2,y))
       #------------------------------------------------
       r = int(img[0][y][x])
       g = int(img[1][y][x])
@@ -536,7 +552,7 @@ if __name__ == "__main__":
     import sys
 
     poses      = 10 
-    resolution = 150 #64#150
+    resolution = 1024 #64#150
     near = 0 
     far  = 650
 
