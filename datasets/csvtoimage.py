@@ -3,6 +3,16 @@ import datasets.csvutils as csvutils
 import numpy as np
 import matplotlib.pyplot as plt
 
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
 def getParentList():
  pl=dict()
  #---------------------------------------------------
@@ -267,8 +277,6 @@ def extractListOfLabelsWithoutCoordinates(origin):
     #print("Labels ",labels)
     return labels
 
-
-
 #---------------------------------------------------
 #---------------------------------------------------
 #---------------------------------------------------
@@ -340,6 +348,14 @@ def csvToImageDigitalEncoding(data3D,data2D,sampleID, width=32, height=32):
        #print("Label ",label," x=",x2D," y=",y2D," v=",val," => xS=",xS," yS=",yS," encX=",encX," => encY=",encY," encV=",encV)
    
     return img
+
+
+def imageToCSVDigitalEncoding(data2D, img, sampleID, width=32, height=32):
+  print("TODO: implement imageToCSVDigitalEncoding")
+  import sys
+  sys.exit(0)
+  return 0
+
 #---------------------------------------------------
 #---------------------------------------------------
 #---------------------------------------------------
@@ -429,15 +445,9 @@ def csvToImage(data3D,data2D,sampleID, width=32, height=32, rnd=False, translati
         yP2D = int(min(height-2,yP2D))
         #---------------------------
         y,x,foo = draw_line(y2D,x2D,yP2D,xP2D)
-        if (type(y)==float) or (type(y)==int): 
-         #img[0][y][x] = 255 #Keypoint should be marked! r
-         #img[1][y][x] = g
-         #img[2][y][x] = b
+        if (type(y)==float) or (type(y)==int):
          img = projectDepthPointTo2DTakingOrderIntoAccount(img,x,y,255,g,b)
         elif (type(x)==float) or (type(x)==int):
-         #img[0][y][x] = 255 #Keypoint should be marked! r
-         #img[1][y][x] = g
-         #img[2][y][x] = b
          img = projectDepthPointTo2DTakingOrderIntoAccount(img,x,y,255,g,b)
         else:
          #By default a blue line between joints
@@ -448,19 +458,10 @@ def csvToImage(data3D,data2D,sampleID, width=32, height=32, rnd=False, translati
            if (interpolateDepth):
              interpolatedValue = interpolateValue(x2D,y2D,val,xP2D,yP2D,Pval,x[i],y[i])
              iR,iG,iB = convertDepthValueToRGB(interpolatedValue)
-           #img[0][y[i]][x[i]] = iR
-           #img[1][y[i]][x[i]] = iG
-           #img[2][y[i]][x[i]] = iB
            img = projectDepthPointTo2DTakingOrderIntoAccount(img,x[i],y[i],iR,iG,iB)
-        #------------------------- 
-        #img[0][y2D][x2D]   = 255# Keypoint should be marked!r
-        #img[1][y2D][x2D]   = g
-        #img[2][y2D][x2D]   = b
+        #-------------------------
         img = projectDepthPointTo2DTakingOrderIntoAccount(img,x2D,y2D,255,g,b)
         #-------------------------
-        #img[0][yP2D][xP2D] = Pval
-        #img[1][yP2D][xP2D] = Pval 
-
     #print("Encode Min/Max R ",np.min(img[0][:][:]),np.max(img[0][:][:]))
     #print("Encode Min/Max G ",np.min(img[1][:][:]),np.max(img[1][:][:]))
     #print("Encode Min/Max B ",np.min(img[2][:][:]),np.max(img[2][:][:]))
@@ -471,6 +472,9 @@ def csvToImage(data3D,data2D,sampleID, width=32, height=32, rnd=False, translati
   Convert CSV 2D Data + Image to 3D Data!
 """ 
 def imageToCSV(data2D, img, sampleID, width=32, height=32, rnd=False, translationInvariant=True, interpolateDepth=True, bkg=0.5, encoding=False):
+    if (encoding):
+        return imageToCSVDigitalEncoding(data2D,img,sampleID,width=width,height=height)
+
     #------------------------------------------------
     labels = extractListOfLabelsWithoutCoordinates(data2D["label"])
     #------------------------------------------------
@@ -567,7 +571,7 @@ if __name__ == "__main__":
     for p in range(poses):
       print("Dumping pose ",p)
       img         = csvToImage(pose3d,pose2d,p,resolution,resolution)
-      #img         = randomizeImageDepth(img,resolution,resolution) #<- Randomize
+      #img        = randomizeImageDepth(img,resolution,resolution) #<- Randomize
       recovered3D = imageToCSV(pose2d,img,p,resolution,resolution)
 
       #print("Labels 3D ",recovered3D["label"])
@@ -581,7 +585,15 @@ if __name__ == "__main__":
             recoveredIDX   = recovered3D["label"].index(thisLabel)
             recoveredDepth = recovered3D["body"][0][recoveredIDX]
             #------------------------------------------------------
-            print("Depth Discrepancy %s = %f (org %f,rec %f)"%(label,abs(originalDepth-recoveredDepth),originalDepth,recoveredDepth))
+            discrepancy = abs(originalDepth-recoveredDepth)
+            if (discrepancy < 1.0):
+              print(bcolors.OKGREEN,end="")
+            elif (discrepancy < 10.0):
+              print(bcolors.WARNING,end="")
+            else:
+              print(bcolors.FAIL,end="")
+            print("Depth Discrepancy %s = %f (org %f,rec %f)"%(label,discrepancy,originalDepth,recoveredDepth))
+            print(bcolors.ENDC,end="")
 
       imgSwapped = np.swapaxes(img,0,2)
       imgSwapped = np.swapaxes(imgSwapped,0,1)
