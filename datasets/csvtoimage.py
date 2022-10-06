@@ -586,7 +586,7 @@ if __name__ == "__main__":
     print("Labels ",labels)
 
     for p in range(poses):
-      print("Dumping pose ",p)
+      print(bcolors.BOLD,bcolors.UNDERLINE," ||||||||||||||||| Dumping pose ",p,"||||||||||||||||| ",bcolors.ENDC)
       img         = csvToImage(pose3d,pose2d,p,resolution,resolution)
       #img        = randomizeImageDepth(img,resolution,resolution) #<- Randomize
       recovered3D = imageToCSV(pose2d,img,p,resolution,resolution)
@@ -609,7 +609,7 @@ if __name__ == "__main__":
               print(bcolors.WARNING,end="")
             else:
               print(bcolors.FAIL,end="")
-            print("Depth Discrepancy %s = %f (org %f,rec %f)"%(label,discrepancy,originalDepth,recoveredDepth))
+            print("Depth Discrepancy %s = %f cm (org %f,rec %f)"%(label,discrepancy,originalDepth,recoveredDepth))
             print(bcolors.ENDC,end="")
 
       imgSwapped = np.swapaxes(img,0,2)
