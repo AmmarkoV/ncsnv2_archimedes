@@ -591,7 +591,12 @@ if __name__ == "__main__":
 
     pose2d=csvutils.readCSVFile("exp/datasets/cmubvh/2d_body_all.csv",memPercentage=numberOfPoses)
     pose3d=csvutils.readCSVFile("exp/datasets/cmubvh/3d_body_all.csv",memPercentage=numberOfPoses)
-
+    if (len(pose2d)!=len(pose3d)):
+        print("Incoherent 2D/3D files\n")
+        sys.exit(0)
+    else:
+        numberOfPoses = len(pose2d)
+   
     #-----------------------------------
     labels = extractListOfLabelsWithoutCoordinates(pose2d["label"])
     #-----------------------------------
