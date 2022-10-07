@@ -254,10 +254,10 @@ def distance2D(x1,y1,x2,y2):
 """
 def interpolateValue(sX,sY,sV,tX,tY,tV,currentX,currentY):
    #-----------------------------------------------------
-   #if (sX==currentX) and (sY==currentY):
-   #   return sV
-   #if (tX==currentX) and (tY==currentY):
-   #   return tV
+   if (sX==currentX) and (sY==currentY):
+      return sV
+   if (tX==currentX) and (tY==currentY):
+      return tV
    #-----------------------------------------------------
    distanceToSource = distance2D(sX,sY,currentX,currentY)
    distanceToTarget = distance2D(tX,tY,currentX,currentY)
@@ -559,10 +559,17 @@ def imageToCSV(data2D, img, sampleID, width=32, height=32, rnd=False, translatio
 if __name__ == "__main__":
     import sys
 
-    numberOfPoses = 9 
-    resolution    = 1024 #64#150
+    numberOfPoses = 1.0 
+    resolution    = 64 #64#150
     near = 0 
     far  = 650
+    saveVisualizations = True
+    
+    bigTaskAhead = False
+    if (numberOfPoses>100) or (numberOfPoses==1.0):
+      bigTaskAhead = True 
+      saveVisualizations = False
+      print("Disabling visualizations to boost task")
 
     legendStepX=list()
     legendStepY=list()
@@ -592,8 +599,18 @@ if __name__ == "__main__":
     print("Labels 3D ",pose3d["label"])
     print("Labels ",labels)
 
+    measurements = dict()
+    for label in labels:
+          thisLabel = "3DZ_%s" % label
+          measurements[thisLabel]=list()
+      
     for p in range(numberOfPoses):
-      print(bcolors.BOLD,bcolors.UNDERLINE," ||||||||||||||||| Dumping pose ",p,"/",numberOfPoses,"||||||||||||||||| ",bcolors.ENDC)
+      #------------------------------------
+      if (p%1000 == 0):
+         print(" ",p,"/",numberOfPoses," ")
+      #------------------------------------
+      if (not bigTaskAhead):
+         print(bcolors.BOLD,bcolors.UNDERLINE," ||||||||||||||||| Dumping pose ",p,"/",numberOfPoses,"||||||||||||||||| ",bcolors.ENDC)
       img         = csvToImage(pose3d,pose2d,p,resolution,resolution)
       #img        = randomizeImageDepth(img,resolution,resolution) #<- Randomize
       recovered3D = imageToCSV(pose2d,img,p,resolution,resolution)
@@ -610,23 +627,59 @@ if __name__ == "__main__":
             recoveredDepth = recovered3D["body"][0][recoveredIDX]
             #------------------------------------------------------
             discrepancy = abs(originalDepth-recoveredDepth)
-            if (discrepancy < 1.0):
+            measurements[thisLabel].append(discrepancy)
+            #------------------------------------------------------
+            if (not bigTaskAhead):
+             if (discrepancy < 1.0):
               print(bcolors.OKGREEN,end="")
-            elif (discrepancy < 10.0):
+             elif (discrepancy < 10.0):
               print(bcolors.WARNING,end="")
-            else:
+             else:
               print(bcolors.FAIL,end="")
-            print("Depth Discrepancy %s = %0.2f cm (org %0.2f,rec %0.2f)"%(label,discrepancy,originalDepth,recoveredDepth))
-            print(bcolors.ENDC,end="")
+             print("Depth Discrepancy %s = %0.2f cm (org %0.2f,rec %0.2f)"%(label,discrepancy,originalDepth,recoveredDepth))
+             print(bcolors.ENDC,end="")
+            #------------------------------------------------------
+            
+      if (saveVisualizations):
+        imgSwapped = np.swapaxes(img,0,2)
+        imgSwapped = np.swapaxes(imgSwapped,0,1)
+        fig = plt.imshow(imgSwapped.astype(np.uint8))
+        plt.imsave(f'debug/pose{p}.png',imgSwapped.astype(np.uint8))
+        plt.savefig(f'debug/fig{p}.png')
+        plt.cla()
 
-      imgSwapped = np.swapaxes(img,0,2)
-      imgSwapped = np.swapaxes(imgSwapped,0,1)
-      fig = plt.imshow(imgSwapped.astype(np.uint8))
-
-      # fig.axes.get_xaxis().set_visible(False)
-      # fig.axes.get_yaxis().set_visible(False)
-      plt.imsave(f'debug/pose{p}.png',imgSwapped.astype(np.uint8))
-      plt.savefig(f'debug/fig{p}.png')
-      plt.cla()
 
 
+    f = open("debug/encodingQuality.csv", "w")
+    f.write("Joint,Samples,Min,Max,Mean,Median,Std,Var\n")
+    for label in labels:
+          thisLabel = "3DZ_%s" % label
+          samples = len(measurements[thisLabel])
+          minimum = np.min(measurements[thisLabel])
+          maximum = np.max(measurements[thisLabel])
+          mean    = np.mean(measurements[thisLabel])
+          median  = np.median(measurements[thisLabel])
+          std     = np.std(measurements[thisLabel])
+          var     = np.var(measurements[thisLabel])
+          #---------------------------------------------------------------------------------------------------------------
+          print(thisLabel," Encoding Quality => samples ",samples," min ",minimum," max ",maximum," median ",median," mean ",mean," std ",std," var ",var)
+          #---------------------------------------------------------------------------------------------------------------
+          f.write(label)
+          f.write(",")
+          f.write(str(samples))
+          f.write(",")
+          f.write(str(minimum))
+          f.write(",")
+          f.write(str(maximum))
+          f.write(",")
+          f.write(str(mean))
+          f.write(",")
+          f.write(str(median))
+          f.write(",")
+          f.write(str(std))
+          f.write(",")
+          f.write(str(var))
+          f.write("\n")
+    f.close()
+
+    print("Done..")
