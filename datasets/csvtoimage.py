@@ -263,11 +263,17 @@ def interpolateValue(sX,sY,sV,tX,tY,tV,currentX,currentY):
    distanceToTarget = distance2D(tX,tY,currentX,currentY)
    distanceFull     = distance2D(sX,sY,tX,tY)
    #-----------------------------------------------------
-   value = 0.0
-   value = value + sV * (distanceToSource/distanceFull)
-   value = value + tV * (distanceToTarget/distanceFull)
+   currentV = 0.0
+   currentV = currentV + sV * (distanceToSource/distanceFull)
+   currentV = currentV + tV * (distanceToTarget/distanceFull)
    #-----------------------------------------------------
-   return value
+   #
+   #   Source Point
+   #     sX,sY,sV            currentX,currentY , (? currentV ?)            tX,tY,tV
+   #       *    - - - - - - - - - - - - - - * - - - - - - - - - - - - - - - -  * 
+   #       <---        distanceToSource ---> <--- distanceToTarget         --->
+   #       <-----------------------    distanceFull    ----------------------->
+   return currentV
 
 
 def extractListOfLabelsWithoutCoordinates(origin):
