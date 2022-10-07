@@ -267,8 +267,7 @@ def interpolateValue(sX,sY,sV,tX,tY,tV,currentX,currentY):
    currentV = currentV + sV * (distanceToSource/distanceFull)
    currentV = currentV + tV * (distanceToTarget/distanceFull)
    #-----------------------------------------------------
-   #
-   #   Source Point
+   #   Source Point                                                      Target Point
    #     sX,sY,sV            currentX,currentY , (? currentV ?)            tX,tY,tV
    #       *    - - - - - - - - - - - - - - * - - - - - - - - - - - - - - - -  * 
    #       <---        distanceToSource ---> <--- distanceToTarget         --->
