@@ -560,7 +560,7 @@ if __name__ == "__main__":
     import sys
 
     numberOfPoses = 1.0 
-    resolution    = 64 #64#150
+    resolution    = 128 #64#150
     near = 0 
     far  = 650
     saveVisualizations = True
@@ -655,8 +655,8 @@ if __name__ == "__main__":
 
 
 
-    f = open("debug/encodingQuality.csv", "w")
-    f.write("Joint,Samples_%ux%u,Min,Max,Mean,Median,Std,Var\n"%(resolution,resolution))
+    f = open("debug/encodingQuality_%ux%u.csv"%(resolution,resolution), "w")
+    f.write("Joint,Samples,Min,Max,Mean,Median,Std,Var\n")
     for label in labels:
           thisLabel = "3DZ_%s" % label
           samples = len(measurements[thisLabel])
