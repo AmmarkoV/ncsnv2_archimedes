@@ -433,8 +433,8 @@ def csvToImage(data3D,data2D,sampleID, width=32, height=32, rnd=False, translati
 
        #The R,G,B Value to be filled in @ xP2D,yP2D  a.k.a. our parent point
        xP2D,yP2D,Pval     = getJoint3DCoordinates(data2D["label"],data2D["body"],data3D["label"],data3D["body"],parentList[label],width,height,sampleID)
+       pR,pG,pB = convertDepthValueToRGB(Pval)
        
-
        #if not label in data2D["label"]:
        #   print(label," not in data2D")
        #if not parentList[label] in data2D["label"]:
@@ -457,15 +457,9 @@ def csvToImage(data3D,data2D,sampleID, width=32, height=32, rnd=False, translati
 
         #Draw a line from our point back to the parent point!
         y,x,foo = draw_line(y2D,x2D,yP2D,xP2D)
-        if (type(y)==float) or (type(y)==int):
-         img = projectDepthPointTo2DTakingOrderIntoAccount(img,x,y,255,g,b)
-        elif (type(x)==float) or (type(x)==int):
-         img = projectDepthPointTo2DTakingOrderIntoAccount(img,x,y,255,g,b)
-        else:
-         #By default a blue line between joints
-         iR = 0
-         iG = 0 
-         iB = 255
+        if (  (type(x)!=float) and (type(x)!=int) and (type(y)==float) and (type(y)==int) ): 
+         #If we don't have a single point either x or y, we want to write a (by default) blue line between joints
+         iR = 0;  iG = 0; iB = 255
          for i in range(0,len(y)):
            #The blue line can however be overriden
            if (interpolateDepth):
@@ -474,6 +468,7 @@ def csvToImage(data3D,data2D,sampleID, width=32, height=32, rnd=False, translati
            img = projectDepthPointTo2DTakingOrderIntoAccount(img,x[i],y[i],iR,iG,iB)
         #-------------------------
         img = projectDepthPointTo2DTakingOrderIntoAccount(img,x2D,y2D,255,g,b)
+        img = projectDepthPointTo2DTakingOrderIntoAccount(img,xP2D,yP2D,255,pG,pB)
         #-------------------------
     #print("Encode Min/Max R ",np.min(img[0][:][:]),np.max(img[0][:][:]))
     #print("Encode Min/Max G ",np.min(img[1][:][:]),np.max(img[1][:][:]))
