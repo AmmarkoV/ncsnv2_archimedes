@@ -421,7 +421,7 @@ def csvToImage(data3D,data2D,sampleID, width=32, height=32, rnd=False, translati
     alignX2D = 0
     alignY2D = 0
     if (translationInvariant):
-       x2D, y2D, _ = getJoint3DCoordinates(data2D["label"],data2D["body"],data3D["label"],data3D["body"],"hip",width,height,sampleID)
+       x2D, y2D = getJoint2DCoordinates(data2D["label"],data2D["body"],"hip",width,height,sampleID)
        alignX2D = (width/2)  - x2D
        alignY2D = (height/2) - y2D 
 
@@ -609,7 +609,7 @@ if __name__ == "__main__":
               print(bcolors.WARNING,end="")
             else:
               print(bcolors.FAIL,end="")
-            print("Depth Discrepancy %s = %f cm (org %f,rec %f)"%(label,discrepancy,originalDepth,recoveredDepth))
+            print("Depth Discrepancy %s = %0.2f cm (org %0.2f,rec %0.2f)"%(label,discrepancy,originalDepth,recoveredDepth))
             print(bcolors.ENDC,end="")
 
       imgSwapped = np.swapaxes(img,0,2)
