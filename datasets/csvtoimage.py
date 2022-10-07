@@ -591,11 +591,11 @@ if __name__ == "__main__":
 
     pose2d=csvutils.readCSVFile("exp/datasets/cmubvh/2d_body_all.csv",memPercentage=numberOfPoses)
     pose3d=csvutils.readCSVFile("exp/datasets/cmubvh/3d_body_all.csv",memPercentage=numberOfPoses)
-    if (len(pose2d)!=len(pose3d)):
+    if (len(pose2d['body'])!=len(pose3d['body'])):
         print("Incoherent 2D/3D files\n")
         sys.exit(0)
     else:
-        numberOfPoses = len(pose2d)
+        numberOfPoses = len(pose2d['body'])
    
     #-----------------------------------
     labels = extractListOfLabelsWithoutCoordinates(pose2d["label"])
@@ -656,7 +656,7 @@ if __name__ == "__main__":
 
 
     f = open("debug/encodingQuality.csv", "w")
-    f.write("Joint,Samples,Min,Max,Mean,Median,Std,Var\n")
+    f.write("Joint,Samples_%ux%u,Min,Max,Mean,Median,Std,Var\n"%(resolution,resolution))
     for label in labels:
           thisLabel = "3DZ_%s" % label
           samples = len(measurements[thisLabel])
