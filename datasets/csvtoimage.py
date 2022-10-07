@@ -254,18 +254,18 @@ def distance2D(x1,y1,x2,y2):
 """
 def interpolateValue(sX,sY,sV,tX,tY,tV,currentX,currentY):
    #-----------------------------------------------------
-   if (sX==currentX) and (sY==currentY):
-      return sV
-   if (tX==currentX) and (tY==currentY):
-      return tV
+   #if (sX==currentX) and (sY==currentY):
+   #   return sV
+   #if (tX==currentX) and (tY==currentY):
+   #   return tV
    #-----------------------------------------------------
    distanceToSource = distance2D(sX,sY,currentX,currentY)
    distanceToTarget = distance2D(tX,tY,currentX,currentY)
    distanceFull     = distance2D(sX,sY,tX,tY)
    #-----------------------------------------------------
    currentV = 0.0
-   currentV = currentV + sV * (distanceToSource/distanceFull)
-   currentV = currentV + tV * (distanceToTarget/distanceFull)
+   currentV = currentV + tV * (distanceToSource/distanceFull)
+   currentV = currentV + sV * (distanceToTarget/distanceFull)
    #-----------------------------------------------------
    #   Source Point                                                      Target Point
    #     sX,sY,sV            currentX,currentY , (? currentV ?)            tX,tY,tV
