@@ -253,13 +253,20 @@ def distance2D(x1,y1,x2,y2):
   and output something depending on the closest distance. 
 """
 def interpolateValue(sX,sY,sV,tX,tY,tV,currentX,currentY):
+   #-----------------------------------------------------
+   if (sX==currentX) and (sY==currentY):
+      return sV
+   if (tX==currentX) and (tY==currentY):
+      return tV
+   #-----------------------------------------------------
    distanceToSource = distance2D(sX,sY,currentX,currentY)
    distanceToTarget = distance2D(tX,tY,currentX,currentY)
    distanceFull     = distance2D(sX,sY,tX,tY)
-
+   #-----------------------------------------------------
    value = 0.0
    value = value + sV * (distanceToSource/distanceFull)
    value = value + tV * (distanceToTarget/distanceFull)
+   #-----------------------------------------------------
    return value
 
 
@@ -457,7 +464,7 @@ def csvToImage(data3D,data2D,sampleID, width=32, height=32, rnd=False, translati
 
         #Draw a line from our point back to the parent point!
         y,x,foo = draw_line(y2D,x2D,yP2D,xP2D)
-        if (  (type(x)!=float) and (type(x)!=int) and (type(y)==float) and (type(y)==int) ): 
+        if (  (type(x)!=float) and (type(x)!=int) and (type(y)!=float) and (type(y)!=int) ): 
          #If we don't have a single point either x or y, we want to write a (by default) blue line between joints
          iR = 0;  iG = 0; iB = 255
          for i in range(0,len(y)):
@@ -547,8 +554,8 @@ def imageToCSV(data2D, img, sampleID, width=32, height=32, rnd=False, translatio
 if __name__ == "__main__":
     import sys
 
-    poses      = 10 
-    resolution = 1024 #64#150
+    numberOfPoses = 9 
+    resolution    = 1024 #64#150
     near = 0 
     far  = 650
 
@@ -570,8 +577,8 @@ if __name__ == "__main__":
     plt.cla()
 
 
-    pose2d=csvutils.readCSVFile("exp/datasets/cmubvh/2d_body_all.csv",memPercentage=poses)
-    pose3d=csvutils.readCSVFile("exp/datasets/cmubvh/3d_body_all.csv",memPercentage=poses)
+    pose2d=csvutils.readCSVFile("exp/datasets/cmubvh/2d_body_all.csv",memPercentage=numberOfPoses)
+    pose3d=csvutils.readCSVFile("exp/datasets/cmubvh/3d_body_all.csv",memPercentage=numberOfPoses)
 
     #-----------------------------------
     labels = extractListOfLabelsWithoutCoordinates(pose2d["label"])
@@ -580,8 +587,8 @@ if __name__ == "__main__":
     print("Labels 3D ",pose3d["label"])
     print("Labels ",labels)
 
-    for p in range(poses):
-      print(bcolors.BOLD,bcolors.UNDERLINE," ||||||||||||||||| Dumping pose ",p,"||||||||||||||||| ",bcolors.ENDC)
+    for p in range(numberOfPoses):
+      print(bcolors.BOLD,bcolors.UNDERLINE," ||||||||||||||||| Dumping pose ",p,"/",numberOfPoses,"||||||||||||||||| ",bcolors.ENDC)
       img         = csvToImage(pose3d,pose2d,p,resolution,resolution)
       #img        = randomizeImageDepth(img,resolution,resolution) #<- Randomize
       recovered3D = imageToCSV(pose2d,img,p,resolution,resolution)
