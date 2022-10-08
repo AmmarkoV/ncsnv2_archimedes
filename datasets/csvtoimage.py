@@ -560,7 +560,7 @@ if __name__ == "__main__":
     import sys
 
     numberOfPoses = 1.0 
-    resolution    = 128 #64#150
+    resolution    = 256 #64#150
     near = 0 
     far  = 650
     saveVisualizations = True
