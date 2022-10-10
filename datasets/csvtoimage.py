@@ -559,8 +559,8 @@ def imageToCSV(data2D, img, sampleID, width=32, height=32, rnd=False, translatio
 if __name__ == "__main__":
     import sys
 
-    numberOfPoses = 1.0 
-    resolution    = 256 #64#150
+    numberOfPoses = 100# 1.0 
+    resolution    = 192 #64#150
     near = 0 
     far  = 650
     saveVisualizations = True
@@ -604,6 +604,8 @@ if __name__ == "__main__":
     print("Labels 3D ",pose3d["label"])
     print("Labels ",labels)
 
+    xCoordinates = list()
+    yCoordinates = list()
     measurements = dict()
     for label in labels:
           thisLabel = "3DZ_%s" % label
@@ -621,7 +623,18 @@ if __name__ == "__main__":
       recovered3D = imageToCSV(pose2d,img,p,resolution,resolution)
 
       #print("Labels 3D ",recovered3D["label"])
-      for label in labels:
+      for label in labels: 
+          #-----------------------------------------------
+          thisLabel = "2DX_%s" % label
+          if (thisLabel in pose2d["label"]):
+            idX    = pose2d["label"].index(thisLabel)
+            xCoordinates.append(float(pose2d["body"][p][idX]))
+          #-----------------------------------------------
+          thisLabel = "2DY_%s" % label
+          if (thisLabel in pose2d["label"]):
+            idY    = pose2d["label"].index(thisLabel)
+            yCoordinates.append(float(pose2d["body"][p][idY])) 
+          #-----------------------------------------------
           thisLabel = "3DZ_%s" % label
           if (thisLabel in pose3d["label"]) and (thisLabel in recovered3D["label"]):
             #------------------------------------------------------
@@ -654,6 +667,10 @@ if __name__ == "__main__":
         plt.cla()
 
 
+    minimumX = np.min(xCoordinates)
+    maximumX = np.max(xCoordinates)
+    minimumY = np.min(yCoordinates)
+    maximumY = np.max(yCoordinates)
 
     f = open("debug/encodingQuality_%ux%u.csv"%(resolution,resolution), "w")
     f.write("Joint,Samples,Min,Max,Mean,Median,Std,Var\n")
@@ -686,5 +703,6 @@ if __name__ == "__main__":
           f.write(str(var))
           f.write("\n")
     f.close()
-
+   
+    print("Min X : %0.2f Max X : %0.2f Min Y : %0.2f Max Y :%0.2f"% (minimumX,maximumX,minimumY,maximumY) )
     print("Done..")
