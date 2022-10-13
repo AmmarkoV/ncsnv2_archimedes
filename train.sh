@@ -14,7 +14,7 @@ else
  EXPERIMENT=$2
 fi
 
-PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python python main.py --config $CONFIGURATION --doc $EXPERIMENT
+CUDA_VISIBLE_DEVICES="1" PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python python main.py --config $CONFIGURATION --doc $EXPERIMENT
 
 cd "exp/logs"
 scp -P 2222 -r $EXPERIMENT/ ammar@ammar.gr:/home/ammar/public_html/ncsnv2_archimedes/exp/logs/
