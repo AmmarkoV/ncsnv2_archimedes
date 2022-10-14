@@ -559,8 +559,8 @@ def imageToCSV(data2D, img, sampleID, width=32, height=32, rnd=False, translatio
 if __name__ == "__main__":
     import sys
 
-    numberOfPoses = 100# 1.0 
-    resolution    = 192 #64#150
+    numberOfPoses = 1.0# 1.0 or 100 
+    resolution    = 156 #64#150
     near = 0 
     far  = 650
     saveVisualizations = True

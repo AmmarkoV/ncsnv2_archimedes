@@ -14,6 +14,7 @@ else
  EXPERIMENT=$2
 fi
 
+source ncsnv2Env/bin/activate
 CUDA_VISIBLE_DEVICES="1" PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python python main.py --config $CONFIGURATION --doc $EXPERIMENT
 
 cd "exp/logs"
