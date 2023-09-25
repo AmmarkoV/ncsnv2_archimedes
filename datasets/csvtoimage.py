@@ -565,6 +565,21 @@ if __name__ == "__main__":
     far  = 650
     saveVisualizations = True
     
+    if (len(sys.argv)>1):
+       print('Argument List:', str(sys.argv))
+       for i in range(0, len(sys.argv)):
+           if (sys.argv[i]=="--mem"):
+              numberOfPoses = float(sys.argv[i+1])
+           if (sys.argv[i]=="--near"):
+              near = int(sys.argv[i+1])
+           if (sys.argv[i]=="--far"):
+              far = int(sys.argv[i+1])
+           if (sys.argv[i]=="--resolution"):
+              resolution = int(sys.argv[i+1])
+
+
+
+
     bigTaskAhead = False
     if (numberOfPoses>100) or (numberOfPoses==1.0):
       bigTaskAhead = True 
